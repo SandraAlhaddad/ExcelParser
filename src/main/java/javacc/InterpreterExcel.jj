@@ -40,42 +40,42 @@ TOKEN : {
 | <CELL_REFERENCE: "C" <DECIMAL_LITERAL> "R" <DECIMAL_LITERAL>>
 }
 
-void Start() :
-{}
-{
-    Expression()
-}
-
-void Expression() :
-{}
-{
-    // Number expression
-    (
-        <DECIMAL_LITERAL>
-        | <FLOATING_POINT_LITERAL>
-        | FunctionReturningNumber()
-        | DifferenceOfTimestamps()
-    )
-
-    // String expression
-    (
-        <STRING_LITERAL>
-        (
-            <STRING_CONCATENATION_OPERATOR>
-            Expression()
-        )?
-    )?
-
-    // Timestamp expression
-    (
-        <TIMESTAMP_LITERAL>
-        (
-            <DECIMAL_LITERAL>
-            | <FLOATING_POINT_LITERAL>
-            | FunctionReturningNumber()
-        )?
-    )?
-}
+//void Start() :
+//{}
+//{
+//    Expression()
+//}
+//
+//void Expression() :
+//{}
+//{
+//    // Number expression
+//    (
+//        <DECIMAL_LITERAL>
+//        | <FLOATING_POINT_LITERAL>
+//        | FunctionReturningNumber()
+//        | DifferenceOfTimestamps()
+//    )
+//
+//    // String expression
+//    (
+//        <STRING_LITERAL>
+//        (
+//            <STRING_CONCATENATION_OPERATOR>
+//            Expression()
+//        )?
+//    )?
+//
+//    // Timestamp expression
+//    (
+//        <TIMESTAMP_LITERAL>
+//        (
+//            <DECIMAL_LITERAL>
+//            | <FLOATING_POINT_LITERAL>
+//            | FunctionReturningNumber()
+//        )?
+//    )?
+//}
 
 ////void FunctionReturningNumber() :
 ////{}
