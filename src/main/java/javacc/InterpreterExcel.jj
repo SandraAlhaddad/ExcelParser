@@ -1,0 +1,108 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */options
+        {
+        IGNORE_CASE = true;
+        STATIC = false;
+        }PARSER_BEGIN(InterpreterExcel)package javacc;
+
+public class InterpreterExcel{  public static void main(String args []) throws ParseException  {        try {
+            InterpreterExcel parser = new InterpreterExcel(System.in);
+            parser.parse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }  }}PARSER_END(InterpreterExcel)SKIP: {
+    " " | "\t" | "\n" | "\r"
+}
+
+// Define tokens
+TOKEN : {
+  <DECIMAL_LITERAL: (["+","-"])?["1"-"9"](["0"-"9"])* >
+| < FLOATING_POINT_LITERAL: ( "+" | "-" )?
+          (
+            (["0"-"9"])+ "E"( "+" | "-" )?(["0"-"9"])+
+            | "\\." (["0"-"9"])+ ( "E" ( "+" | "-" )? (["0"-"9"])+ )?
+            | (["0"-"9"])+ "\\." (["0"-"9"])* ( "E" ( "+" | "-" )? (["0"-"9"])+ )?
+          )
+      >
+| <STRING_LITERAL: "'" ( ~["'"] | "''" )* "'" >
+| <TIMESTAMP_LITERAL: "{" ["0"-"9"]["0"-"9"]["0"-"9"]["0"-"9"] "-" ["0"-"9"]["0"-"9"] "-" ["0"-"9"]["0"-"9"] " " ["0"-"9"]["0"-"9"] ":" ["0"-"9"]["0"-"9"] ":" ["0"-"9"]["0"-"9"] "}" >
+| <VARIABLE: ["i","j","k","l","m","n"] >
+| < FORMATTED: "FORMATTED" >
+| < FOR: "for" >
+| < FROM: "from" >
+| < TO: "to" >
+| < DO: "do" >
+| < END: "end" >
+| < ASSIGNMENT_OPERATOR: "=" >
+| < STRING_CONCATENATION_OPERATOR: "&" >
+| < COMPARISON_OPERATOR: "<" | "<=" | "=" | ">=" | ">" | "<>" >
+| <CELL_REFERENCE: "C" <DECIMAL_LITERAL> "R" <DECIMAL_LITERAL>>
+}
+
+void Start() :
+{}
+{
+    Expression()
+}
+
+void Expression() :
+{}
+{
+    // Number expression
+    (
+        <DECIMAL_LITERAL>
+        | <FLOATING_POINT_LITERAL>
+        | FunctionReturningNumber()
+        | DifferenceOfTimestamps()
+    )
+
+    // String expression
+    (
+        <STRING_LITERAL>
+        (
+            <STRING_CONCATENATION_OPERATOR>
+            Expression()
+        )?
+    )?
+
+    // Timestamp expression
+    (
+        <TIMESTAMP_LITERAL>
+        (
+            <DECIMAL_LITERAL>
+            | <FLOATING_POINT_LITERAL>
+            | FunctionReturningNumber()
+        )?
+    )?
+}
+
+////void FunctionReturningNumber() :
+////{}
+////{
+////    // Function returning a number
+////    // Add grammar rules for specific functions here
+////}
+//
+//void DifferenceOfTimestamps() :
+//{}
+//{
+//    // Difference of two timestamp values
+//    <TIMESTAMP_LITERAL> "-" <TIMESTAMP_LITERAL>
+//}
+//
+//void Assignment() :
+//{}
+//{
+//    <CELL_REFERENCE> <ASSIGNMENT_OPERATOR> Expression()
+//    [
+//        <FORMATTED> Expression()
+//    ]
+//}
+//
+//void ForLoop() :
+//{}
+//{
+//    <FOR> <VARIABLE> <FROM> Expression() <TO> Expression()
+//    <DO> Assignment() <END>
+//}
