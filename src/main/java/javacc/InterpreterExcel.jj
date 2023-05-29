@@ -34,75 +34,102 @@ TOKEN : {
 | < TO: "to" >
 | < DO: "do" >
 | < END: "end" >
-| < ASSIGNMENT_OPERATOR: "=" >
+| < C: "C" >
+| < R: "R" >
+| < ASSIGNEMENT_OPERATOR: "=" >
 | < STRING_CONCATENATION_OPERATOR: "&" >
 | < COMPARISON_OPERATOR: "<" | "<=" | "=" | ">=" | ">" | "<>" >
-| <CELL_REFERENCE: "C" <DECIMAL_LITERAL> "R" <DECIMAL_LITERAL>>
+| < FUNCTION_NAME: (<LETTER>) (<ALPHANUM>)* >
+| < DIGIT    : ["0"-"9"] >
+| < LETTER   : ["a"-"z","A"-"Z"] >
+| < ALPHANUM : <LETTER> | <DIGIT> >  
+//| <CELL_REFERENCE: "C" <DECIMAL_LITERAL> "R" <DECIMAL_LITERAL>>
 }
 
-//void Start() :
-//{}
-//{
-//    Expression()
-//}
-//
-//void Expression() :
-//{}
-//{
-//    // Number expression
-//    (
-//        <DECIMAL_LITERAL>
-//        | <FLOATING_POINT_LITERAL>
-//        | FunctionReturningNumber()
-//        | DifferenceOfTimestamps()
-//    )
-//
-//    // String expression
-//    (
-//        <STRING_LITERAL>
-//        (
-//            <STRING_CONCATENATION_OPERATOR>
-//            Expression()
-//        )?
-//    )?
-//
-//    // Timestamp expression
-//    (
-//        <TIMESTAMP_LITERAL>
-//        (
-//            <DECIMAL_LITERAL>
-//            | <FLOATING_POINT_LITERAL>
-//            | FunctionReturningNumber()
-//        )?
-//    )?
-//}
+void expression() :
+{}
+{
+  numberExpression()
+//  | stringExpression()
+//  | timestampExpression()
+//  | booleanExpression()
+//  | cellReference()
+//  | assignment()
+//  | forLoop() 
+}
 
-////void FunctionReturningNumber() :
-////{}
-////{
-////    // Function returning a number
-////    // Add grammar rules for specific functions here
-////}
-//
-//void DifferenceOfTimestamps() :
-//{}
-//{
-//    // Difference of two timestamp values
-//    <TIMESTAMP_LITERAL> "-" <TIMESTAMP_LITERAL>
-//}
-//
-//void Assignment() :
-//{}
-//{
-//    <CELL_REFERENCE> <ASSIGNMENT_OPERATOR> Expression()
-//    [
-//        <FORMATTED> Expression()
-//    ]
-//}
-//
-//void ForLoop() :
-//{}
-//{
-//    <FOR> <VARIABLE> <FROM> Expression() <TO> Expression()
-//    <DO> Assignment() <END>
-//}
+void numberExpression():
+{} {
+  (functionReturningNumber() | differenceOfTimestamps() | numberLiteral())
+}
+
+void numberLiteral() :
+{}
+{
+  <DECIMAL_LITERAL> | <FLOATING_POINT_LITERAL>
+}
+
+void functionReturningNumber() :
+{}
+{
+  <FUNCTION_NAME> "(" functionArguments() ")"
+}
+
+void functionArguments() :
+{}
+{
+  (numberExpression() ("," numberExpression())*)
+}
+
+void stringExpression() :
+{}
+{
+  <STRING_LITERAL> ["&" stringExpression()]
+}
+
+void timestampExpression() :
+{}
+{
+  <TIMESTAMP_LITERAL> ("+" | "-") numberExpression()
+}
+
+void booleanExpression() :
+{}
+{
+  (	    numberExpression() <COMPARISON_OPERATOR> numberExpression()
+	  | stringExpression() <COMPARISON_OPERATOR> stringExpression()
+	  |  timestampExpression() <COMPARISON_OPERATOR> timestampExpression()
+	)
+//  (numberExpression() | stringExpression()| timestampExpression()) <COMPARISON_OPERATOR> (numberExpression() | stringExpression()  | timestampExpression())
+}
+
+void cellReference() :
+{}
+{
+  <C> numberExpression() <R> numberExpression()
+}
+
+void differenceOfTimestamps() :
+{}
+{
+    <TIMESTAMP_LITERAL> "-" <TIMESTAMP_LITERAL>
+}
+
+void assignment() :
+{}
+{
+  cellReference() <ASSIGNEMENT_OPERATOR> expression() [<FORMATTED> stringExpression()]
+}
+
+void forLoop() :
+{}
+{
+    <FOR> <VARIABLE> <FROM> expression() <TO> expression()
+    <DO> assignment() <END>
+}
+
+void parse() :
+{}
+{
+    expression() < EOF >
+}

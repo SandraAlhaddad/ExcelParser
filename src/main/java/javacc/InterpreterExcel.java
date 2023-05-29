@@ -12,6 +12,169 @@ public class InterpreterExcel implements InterpreterExcelConstants {
         }
   }
 
+  final public void expression() throws ParseException {
+    numberExpression();
+  }
+
+  final public void numberExpression() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case FUNCTION_NAME:
+      functionReturningNumber();
+      break;
+    case TIMESTAMP_LITERAL:
+      differenceOfTimestamps();
+      break;
+    case DECIMAL_LITERAL:
+    case FLOATING_POINT_LITERAL:
+      numberLiteral();
+      break;
+    default:
+      jj_la1[0] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  final public void numberLiteral() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case DECIMAL_LITERAL:
+      jj_consume_token(DECIMAL_LITERAL);
+      break;
+    case FLOATING_POINT_LITERAL:
+      jj_consume_token(FLOATING_POINT_LITERAL);
+      break;
+    default:
+      jj_la1[1] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  final public void functionReturningNumber() throws ParseException {
+    jj_consume_token(FUNCTION_NAME);
+    jj_consume_token(25);
+    functionArguments();
+    jj_consume_token(26);
+  }
+
+  final public void functionArguments() throws ParseException {
+    numberExpression();
+    label_1:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 27:
+        ;
+        break;
+      default:
+        jj_la1[2] = jj_gen;
+        break label_1;
+      }
+      jj_consume_token(27);
+      numberExpression();
+    }
+  }
+
+  final public void stringExpression() throws ParseException {
+    jj_consume_token(STRING_LITERAL);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case STRING_CONCATENATION_OPERATOR:
+      jj_consume_token(STRING_CONCATENATION_OPERATOR);
+      stringExpression();
+      break;
+    default:
+      jj_la1[3] = jj_gen;
+      ;
+    }
+  }
+
+  final public void timestampExpression() throws ParseException {
+    jj_consume_token(TIMESTAMP_LITERAL);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case 28:
+      jj_consume_token(28);
+      break;
+    case 29:
+      jj_consume_token(29);
+      break;
+    default:
+      jj_la1[4] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    numberExpression();
+  }
+
+  final public void booleanExpression() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case DECIMAL_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case TIMESTAMP_LITERAL:
+    case FUNCTION_NAME:
+      numberExpression();
+      jj_consume_token(COMPARISON_OPERATOR);
+      numberExpression();
+      break;
+    case STRING_LITERAL:
+      stringExpression();
+      jj_consume_token(COMPARISON_OPERATOR);
+      stringExpression();
+      break;
+      timestampExpression();
+      jj_consume_token(COMPARISON_OPERATOR);
+      timestampExpression();
+      break;
+    default:
+      jj_la1[5] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  final public void cellReference() throws ParseException {
+    jj_consume_token(C);
+    numberExpression();
+    jj_consume_token(R);
+    numberExpression();
+  }
+
+  final public void differenceOfTimestamps() throws ParseException {
+    jj_consume_token(TIMESTAMP_LITERAL);
+    jj_consume_token(29);
+    jj_consume_token(TIMESTAMP_LITERAL);
+  }
+
+  final public void assignment() throws ParseException {
+    cellReference();
+    jj_consume_token(ASSIGNEMENT_OPERATOR);
+    expression();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case FORMATTED:
+      jj_consume_token(FORMATTED);
+      stringExpression();
+      break;
+    default:
+      jj_la1[6] = jj_gen;
+      ;
+    }
+  }
+
+  final public void forLoop() throws ParseException {
+    jj_consume_token(FOR);
+    jj_consume_token(VARIABLE);
+    jj_consume_token(FROM);
+    expression();
+    jj_consume_token(TO);
+    expression();
+    jj_consume_token(DO);
+    assignment();
+    jj_consume_token(END);
+  }
+
+  final public void parse() throws ParseException {
+    expression();
+    jj_consume_token(0);
+  }
+
   /** Generated Token Manager. */
   public InterpreterExcelTokenManager token_source;
   SimpleCharStream jj_input_stream;
@@ -21,13 +184,13 @@ public class InterpreterExcel implements InterpreterExcelConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[0];
+  final private int[] jj_la1 = new int[7];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {};
+      jj_la1_0 = new int[] {0x200160,0x60,0x8000000,0x80000,0x30000000,0x2001e0,0x400,};
    }
 
   /** Constructor with InputStream. */
@@ -41,7 +204,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -55,7 +218,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -65,7 +228,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -75,7 +238,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -84,7 +247,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -93,7 +256,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -144,12 +307,12 @@ public class InterpreterExcel implements InterpreterExcelConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[20];
+    boolean[] la1tokens = new boolean[30];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 0; i++) {
+    for (int i = 0; i < 7; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -158,7 +321,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
         }
       }
     }
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 30; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

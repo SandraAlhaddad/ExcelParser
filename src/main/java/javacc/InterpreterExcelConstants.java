@@ -33,13 +33,23 @@ public interface InterpreterExcelConstants {
   /** RegularExpression Id. */
   int END = 15;
   /** RegularExpression Id. */
-  int ASSIGNMENT_OPERATOR = 16;
+  int C = 16;
   /** RegularExpression Id. */
-  int STRING_CONCATENATION_OPERATOR = 17;
+  int R = 17;
   /** RegularExpression Id. */
-  int COMPARISON_OPERATOR = 18;
+  int ASSIGNEMENT_OPERATOR = 18;
   /** RegularExpression Id. */
-  int CELL_REFERENCE = 19;
+  int STRING_CONCATENATION_OPERATOR = 19;
+  /** RegularExpression Id. */
+  int COMPARISON_OPERATOR = 20;
+  /** RegularExpression Id. */
+  int FUNCTION_NAME = 21;
+  /** RegularExpression Id. */
+  int DIGIT = 22;
+  /** RegularExpression Id. */
+  int LETTER = 23;
+  /** RegularExpression Id. */
+  int ALPHANUM = 24;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -62,10 +72,20 @@ public interface InterpreterExcelConstants {
     "\"to\"",
     "\"do\"",
     "\"end\"",
+    "\"C\"",
+    "\"R\"",
     "\"=\"",
     "\"&\"",
     "<COMPARISON_OPERATOR>",
-    "<CELL_REFERENCE>",
+    "<FUNCTION_NAME>",
+    "<DIGIT>",
+    "<LETTER>",
+    "<ALPHANUM>",
+    "\"(\"",
+    "\")\"",
+    "\",\"",
+    "\"+\"",
+    "\"-\"",
   };
 
 }
