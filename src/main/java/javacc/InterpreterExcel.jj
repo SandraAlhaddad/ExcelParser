@@ -49,18 +49,18 @@ TOKEN : {
 void expression() :
 {}
 {
-  numberExpression()
-//  | stringExpression()
-//  | timestampExpression()
-//  | booleanExpression()
-//  | cellReference()
-//  | assignment()
-//  | forLoop() 
+  LOOKAHEAD(6) numberExpression()
+  | LOOKAHEAD(6) stringExpression()
+  | LOOKAHEAD(6) timestampExpression()
+  | LOOKAHEAD(6) booleanExpression()
+  | LOOKAHEAD(6) cellReference()
+  | LOOKAHEAD(6) assignment()
+  | LOOKAHEAD(6) forLoop() 
 }
 
 void numberExpression():
 {} {
-  (functionReturningNumber() | differenceOfTimestamps() | numberLiteral())
+  LOOKAHEAD(3) functionReturningNumber() | LOOKAHEAD(3) differenceOfTimestamps() | LOOKAHEAD(3) numberLiteral()
 }
 
 void numberLiteral() :
@@ -96,9 +96,9 @@ void timestampExpression() :
 void booleanExpression() :
 {}
 {
-  (	    numberExpression() <COMPARISON_OPERATOR> numberExpression()
-	  | stringExpression() <COMPARISON_OPERATOR> stringExpression()
-	  |  timestampExpression() <COMPARISON_OPERATOR> timestampExpression()
+  (	    LOOKAHEAD(3) numberExpression() <COMPARISON_OPERATOR> numberExpression()
+	  | LOOKAHEAD(3) stringExpression() <COMPARISON_OPERATOR> stringExpression()
+	  |  LOOKAHEAD(3) timestampExpression() <COMPARISON_OPERATOR> timestampExpression()
 	)
 //  (numberExpression() | stringExpression()| timestampExpression()) <COMPARISON_OPERATOR> (numberExpression() | stringExpression()  | timestampExpression())
 }
