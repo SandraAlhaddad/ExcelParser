@@ -14,19 +14,19 @@ public class InterpreterExcel implements InterpreterExcelConstants {
 
   final public void expression() throws ParseException {
     if (jj_2_1(6)) {
-      numberExpression();
-    } else if (jj_2_2(6)) {
-      stringExpression();
-    } else if (jj_2_3(6)) {
-      timestampExpression();
-    } else if (jj_2_4(6)) {
       booleanExpression();
+    } else if (jj_2_2(6)) {
+      numberExpression();
+    } else if (jj_2_3(6)) {
+      stringAndCellExpression();
+    } else if (jj_2_4(6)) {
+      stringExpression();
     } else if (jj_2_5(6)) {
-      cellReference();
+      timestampExpression();
     } else if (jj_2_6(6)) {
-      assignment();
+      cellReference();
     } else if (jj_2_7(6)) {
-      forLoop();
+      cellReferenceWithVar();
     } else {
       jj_consume_token(-1);
       throw new ParseException();
@@ -98,6 +98,35 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     }
   }
 
+  final public void stringAndCellExpression() throws ParseException {
+    if (jj_2_11(3)) {
+      cellReference();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case STRING_CONCATENATION_OPERATOR:
+        jj_consume_token(STRING_CONCATENATION_OPERATOR);
+        stringExpression();
+        break;
+      default:
+        jj_la1[3] = jj_gen;
+        ;
+      }
+    } else if (jj_2_12(3)) {
+      cellReferenceWithVar();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case STRING_CONCATENATION_OPERATOR:
+        jj_consume_token(STRING_CONCATENATION_OPERATOR);
+        stringExpression();
+        break;
+      default:
+        jj_la1[4] = jj_gen;
+        ;
+      }
+    } else {
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
   final public void timestampExpression() throws ParseException {
     jj_consume_token(TIMESTAMP_LITERAL);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -108,7 +137,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
       jj_consume_token(29);
       break;
     default:
-      jj_la1[3] = jj_gen;
+      jj_la1[5] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -116,15 +145,15 @@ public class InterpreterExcel implements InterpreterExcelConstants {
   }
 
   final public void booleanExpression() throws ParseException {
-    if (jj_2_11(3)) {
+    if (jj_2_13(3)) {
       numberExpression();
       jj_consume_token(COMPARISON_OPERATOR);
       numberExpression();
-    } else if (jj_2_12(3)) {
+    } else if (jj_2_14(3)) {
       stringExpression();
       jj_consume_token(COMPARISON_OPERATOR);
       stringExpression();
-    } else if (jj_2_13(3)) {
+    } else if (jj_2_15(3)) {
       timestampExpression();
       jj_consume_token(COMPARISON_OPERATOR);
       timestampExpression();
@@ -139,6 +168,70 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     numberExpression();
     jj_consume_token(R);
     numberExpression();
+    label_2:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 28:
+        ;
+        break;
+      default:
+        jj_la1[6] = jj_gen;
+        break label_2;
+      }
+      jj_consume_token(28);
+      jj_consume_token(C);
+      numberExpression();
+      jj_consume_token(R);
+      numberExpression();
+    }
+  }
+
+  final public void cellReferenceWithVar() throws ParseException {
+    jj_consume_token(C);
+    Cexpr();
+    jj_consume_token(R);
+    Cexpr();
+  }
+
+  final public void Cexpr() throws ParseException {
+    numberExpression();
+    label_3:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 28:
+      case 29:
+        ;
+        break;
+      default:
+        jj_la1[7] = jj_gen;
+        break label_3;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 28:
+        jj_consume_token(28);
+        break;
+      case 29:
+        jj_consume_token(29);
+        break;
+      default:
+        jj_la1[8] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      jj_consume_token(VARIABLE);
+    }
+    label_4:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case DECIMAL_LITERAL:
+        ;
+        break;
+      default:
+        jj_la1[9] = jj_gen;
+        break label_4;
+      }
+      jj_consume_token(DECIMAL_LITERAL);
+    }
   }
 
   final public void differenceOfTimestamps() throws ParseException {
@@ -148,17 +241,35 @@ public class InterpreterExcel implements InterpreterExcelConstants {
   }
 
   final public void assignment() throws ParseException {
-    cellReference();
-    jj_consume_token(ASSIGNEMENT_OPERATOR);
-    expression();
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case FORMATTED:
-      jj_consume_token(FORMATTED);
-      stringExpression();
-      break;
-    default:
-      jj_la1[4] = jj_gen;
-      ;
+    if (jj_2_16(3)) {
+      cellReference();
+      jj_consume_token(ASSIGNEMENT_OPERATOR);
+      expression();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case FORMATTED:
+        jj_consume_token(FORMATTED);
+        stringExpression();
+        break;
+      default:
+        jj_la1[10] = jj_gen;
+        ;
+      }
+    } else if (jj_2_17(3)) {
+      cellReferenceWithVar();
+      jj_consume_token(ASSIGNEMENT_OPERATOR);
+      expression();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case FORMATTED:
+        jj_consume_token(FORMATTED);
+        stringExpression();
+        break;
+      default:
+        jj_la1[11] = jj_gen;
+        ;
+      }
+    } else {
+      jj_consume_token(-1);
+      throw new ParseException();
     }
   }
 
@@ -175,7 +286,30 @@ public class InterpreterExcel implements InterpreterExcelConstants {
   }
 
   final public void parse() throws ParseException {
-    expression();
+    label_5:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case FOR:
+      case C:
+        ;
+        break;
+      default:
+        jj_la1[12] = jj_gen;
+        break label_5;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case C:
+        assignment();
+        break;
+      case FOR:
+        forLoop();
+        break;
+      default:
+        jj_la1[13] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    }
     jj_consume_token(0);
   }
 
@@ -270,29 +404,43 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     finally { jj_save(12, xla); }
   }
 
-  private boolean jj_3R_9() {
+  private boolean jj_2_14(int xla) {
+    jj_la = xla; jj_lastpos = jj_scanpos = token;
+    try { return !jj_3_14(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(13, xla); }
+  }
+
+  private boolean jj_2_15(int xla) {
+    jj_la = xla; jj_lastpos = jj_scanpos = token;
+    try { return !jj_3_15(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(14, xla); }
+  }
+
+  private boolean jj_2_16(int xla) {
+    jj_la = xla; jj_lastpos = jj_scanpos = token;
+    try { return !jj_3_16(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(15, xla); }
+  }
+
+  private boolean jj_2_17(int xla) {
+    jj_la = xla; jj_lastpos = jj_scanpos = token;
+    try { return !jj_3_17(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(16, xla); }
+  }
+
+  private boolean jj_3R_13() {
     if (jj_scan_token(FUNCTION_NAME)) return true;
     if (jj_scan_token(25)) return true;
-    if (jj_3R_14()) return true;
+    if (jj_3R_19()) return true;
     if (jj_scan_token(26)) return true;
     return false;
   }
 
-  private boolean jj_3R_7() {
-    if (jj_3R_6()) return true;
-    if (jj_scan_token(ASSIGNEMENT_OPERATOR)) return true;
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_10() {
-    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
-    if (jj_scan_token(29)) return true;
-    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_11() {
+  private boolean jj_3R_15() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_scan_token(5)) {
@@ -302,34 +450,18 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     return false;
   }
 
-  private boolean jj_3_13() {
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
-    if (jj_3R_4()) return true;
-    return false;
-  }
-
-  private boolean jj_3_12() {
-    if (jj_3R_3()) return true;
-    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
-    if (jj_3R_3()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
+  private boolean jj_3R_17() {
+    if (jj_scan_token(28)) return true;
     if (jj_scan_token(C)) return true;
-    if (jj_3R_2()) return true;
-    if (jj_scan_token(R)) return true;
-    if (jj_3R_2()) return true;
     return false;
   }
 
   private boolean jj_3_8() {
-    if (jj_3R_9()) return true;
+    if (jj_3R_13()) return true;
     return false;
   }
 
-  private boolean jj_3R_2() {
+  private boolean jj_3R_7() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3_8()) {
@@ -342,109 +474,173 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     return false;
   }
 
-  private boolean jj_3_11() {
-    if (jj_3R_2()) return true;
-    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
-    if (jj_3R_2()) return true;
+  private boolean jj_3_7() {
+    if (jj_3R_12()) return true;
     return false;
   }
 
-  private boolean jj_3_7() {
-    if (jj_3R_8()) return true;
+  private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(28)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(29)) return true;
+    }
+    if (jj_scan_token(VARIABLE)) return true;
     return false;
   }
 
   private boolean jj_3_6() {
-    if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_12() {
-    if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
-    if (jj_3R_3()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
-  private boolean jj_3_9() {
-    if (jj_3R_10()) return true;
-    return false;
-  }
-
-  private boolean jj_3_3() {
-    if (jj_3R_4()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_15() {
-    if (jj_scan_token(27)) return true;
-    if (jj_3R_2()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_3()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_13() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_1()) {
-    jj_scanpos = xsp;
-    if (jj_3_2()) {
-    jj_scanpos = xsp;
-    if (jj_3_3()) {
-    jj_scanpos = xsp;
-    if (jj_3_4()) {
-    jj_scanpos = xsp;
-    if (jj_3_5()) {
-    jj_scanpos = xsp;
-    if (jj_3_6()) {
-    jj_scanpos = xsp;
-    if (jj_3_7()) return true;
-    }
-    }
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_2()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_5() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_11()) {
-    jj_scanpos = xsp;
-    if (jj_3_12()) {
-    jj_scanpos = xsp;
-    if (jj_3_13()) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3_10() {
     if (jj_3R_11()) return true;
     return false;
   }
 
-  private boolean jj_3R_4() {
+  private boolean jj_3_5() {
+    if (jj_3R_10()) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3_3() {
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_10() {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
+  private boolean jj_3_17() {
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  private boolean jj_3_16() {
+    if (jj_3R_11()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_14() {
+    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
+    if (jj_scan_token(29)) return true;
+    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_18() {
+    if (jj_3R_7()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_22()) { jj_scanpos = xsp; break; }
+    }
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_scan_token(5)) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_21() {
+    if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_20() {
+    if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_12() {
+    if (jj_scan_token(C)) return true;
+    if (jj_3R_18()) return true;
+    if (jj_scan_token(R)) return true;
+    if (jj_3R_18()) return true;
+    return false;
+  }
+
+  private boolean jj_3_15() {
+    if (jj_3R_10()) return true;
+    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
+    if (jj_3R_10()) return true;
+    return false;
+  }
+
+  private boolean jj_3_14() {
+    if (jj_3R_9()) return true;
+    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3_13() {
+    if (jj_3R_7()) return true;
+    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_13()) {
+    jj_scanpos = xsp;
+    if (jj_3_14()) {
+    jj_scanpos = xsp;
+    if (jj_3_15()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_11() {
+    if (jj_scan_token(C)) return true;
+    if (jj_3R_7()) return true;
+    if (jj_scan_token(R)) return true;
+    if (jj_3R_7()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_17()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_16() {
+    if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3_9() {
+    if (jj_3R_14()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_23() {
+    if (jj_scan_token(27)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_10() {
     if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
     Token xsp;
     xsp = jj_scanpos;
@@ -452,34 +648,50 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     jj_scanpos = xsp;
     if (jj_scan_token(29)) return true;
     }
-    if (jj_3R_2()) return true;
+    if (jj_3R_7()) return true;
     return false;
   }
 
-  private boolean jj_3R_3() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
+  private boolean jj_3_12() {
+    if (jj_3R_12()) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_12()) jj_scanpos = xsp;
+    if (jj_3R_21()) jj_scanpos = xsp;
+    return false;
+  }
+
+  private boolean jj_3_11() {
+    if (jj_3R_11()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_20()) jj_scanpos = xsp;
     return false;
   }
 
   private boolean jj_3R_8() {
-    if (jj_scan_token(FOR)) return true;
-    if (jj_scan_token(VARIABLE)) return true;
-    if (jj_scan_token(FROM)) return true;
-    if (jj_3R_13()) return true;
-    if (jj_scan_token(TO)) return true;
-    if (jj_3R_13()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_11()) {
+    jj_scanpos = xsp;
+    if (jj_3_12()) return true;
+    }
     return false;
   }
 
-  private boolean jj_3R_14() {
-    if (jj_3R_2()) return true;
+  private boolean jj_3R_9() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_16()) jj_scanpos = xsp;
+    return false;
+  }
+
+  private boolean jj_3R_19() {
+    if (jj_3R_7()) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_15()) { jj_scanpos = xsp; break; }
+      if (jj_3R_23()) { jj_scanpos = xsp; break; }
     }
     return false;
   }
@@ -495,15 +707,15 @@ public class InterpreterExcel implements InterpreterExcelConstants {
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[5];
+  final private int[] jj_la1 = new int[14];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x60,0x8000000,0x80000,0x30000000,0x400,};
+      jj_la1_0 = new int[] {0x60,0x8000000,0x80000,0x80000,0x80000,0x30000000,0x10000000,0x30000000,0x30000000,0x20,0x400,0x400,0x10800,0x10800,};
    }
-  final private JJCalls[] jj_2_rtns = new JJCalls[13];
+  final private JJCalls[] jj_2_rtns = new JJCalls[17];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
 
@@ -518,7 +730,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -533,7 +745,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -544,7 +756,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -555,7 +767,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -565,7 +777,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -575,7 +787,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -692,7 +904,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 14; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -728,7 +940,7 @@ public class InterpreterExcel implements InterpreterExcelConstants {
 
   private void jj_rescan_token() {
     jj_rescan = true;
-    for (int i = 0; i < 13; i++) {
+    for (int i = 0; i < 17; i++) {
     try {
       JJCalls p = jj_2_rtns[i];
       do {
@@ -748,6 +960,10 @@ public class InterpreterExcel implements InterpreterExcelConstants {
             case 10: jj_3_11(); break;
             case 11: jj_3_12(); break;
             case 12: jj_3_13(); break;
+            case 13: jj_3_14(); break;
+            case 14: jj_3_15(); break;
+            case 15: jj_3_16(); break;
+            case 16: jj_3_17(); break;
           }
         }
         p = p.next;

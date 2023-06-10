@@ -18,7 +18,7 @@ public class InterpreterExcel{  public static void main(String args []) throws
 // Define tokens
 TOKEN : {
   <DECIMAL_LITERAL: (["+","-"])?["1"-"9"](["0"-"9"])* >
-| < FLOATING_POINT_LITERAL: ( "+" | "-" )?
+| <FLOATING_POINT_LITERAL: ( "+" | "-" )?
           (
             (["0"-"9"])+ "E"( "+" | "-" )?(["0"-"9"])+
             | "\\." (["0"-"9"])+ ( "E" ( "+" | "-" )? (["0"-"9"])+ )?
@@ -28,34 +28,35 @@ TOKEN : {
 | <STRING_LITERAL: "'" ( ~["'"] | "''" )* "'" >
 | <TIMESTAMP_LITERAL: "{" ["0"-"9"]["0"-"9"]["0"-"9"]["0"-"9"] "-" ["0"-"9"]["0"-"9"] "-" ["0"-"9"]["0"-"9"] " " ["0"-"9"]["0"-"9"] ":" ["0"-"9"]["0"-"9"] ":" ["0"-"9"]["0"-"9"] "}" >
 | <VARIABLE: ["i","j","k","l","m","n"] >
-| < FORMATTED: "FORMATTED" >
-| < FOR: "for" >
-| < FROM: "from" >
-| < TO: "to" >
-| < DO: "do" >
-| < END: "end" >
-| < C: "C" >
-| < R: "R" >
-| < ASSIGNEMENT_OPERATOR: "=" >
-| < STRING_CONCATENATION_OPERATOR: "&" >
-| < COMPARISON_OPERATOR: "<" | "<=" | "=" | ">=" | ">" | "<>" >
-| < FUNCTION_NAME: (<LETTER>) (<ALPHANUM>)* >
-| < DIGIT    : ["0"-"9"] >
-| < LETTER   : ["a"-"z","A"-"Z"] >
-| < ALPHANUM : <LETTER> | <DIGIT> >  
+| <FORMATTED: "FORMATTED" >
+| <FOR: "for" >
+| <FROM: "from" >
+| <TO: "to" >
+| <DO: "do" >
+| <END: "end" >
+| <C: "C" >
+| <R: "R" >
+| <ASSIGNEMENT_OPERATOR: "=" >
+| <STRING_CONCATENATION_OPERATOR: "&" >
+| <COMPARISON_OPERATOR: "<" | "<=" | "=" | ">=" | ">" | "<>" >
+| <FUNCTION_NAME: "function " (<LETTER>)* >
+| <DIGIT    : ["0"-"9"] >
+| <LETTER   : ["a"-"z","A"-"Z"] >
+| <ALPHANUM : <LETTER> | <DIGIT> >  
 //| <CELL_REFERENCE: "C" <DECIMAL_LITERAL> "R" <DECIMAL_LITERAL>>
 }
 
 void expression() :
 {}
 {
-  LOOKAHEAD(6) numberExpression()
+    LOOKAHEAD(6) booleanExpression()  | LOOKAHEAD(6) numberExpression()
+  | LOOKAHEAD(6) stringAndCellExpression() 
   | LOOKAHEAD(6) stringExpression()
   | LOOKAHEAD(6) timestampExpression()
-  | LOOKAHEAD(6) booleanExpression()
   | LOOKAHEAD(6) cellReference()
-  | LOOKAHEAD(6) assignment()
-  | LOOKAHEAD(6) forLoop() 
+  | LOOKAHEAD(6) cellReferenceWithVar()
+//  | LOOKAHEAD(6) assignment()
+//  | LOOKAHEAD(6) forLoop()
 }
 
 void numberExpression():
@@ -66,7 +67,7 @@ void numberExpression():
 void numberLiteral() :
 {}
 {
-  <DECIMAL_LITERAL> | <FLOATING_POINT_LITERAL>
+  <DECIMAL_LITERAL> | <FLOATING_POINT_LITERAL> 
 }
 
 void functionReturningNumber() :
@@ -87,6 +88,13 @@ void stringExpression() :
   <STRING_LITERAL> ["&" stringExpression()]
 }
 
+void stringAndCellExpression() :
+{}
+{
+  LOOKAHEAD(3) cellReference() ["&" stringExpression()]
+| LOOKAHEAD(3) cellReferenceWithVar() ["&" stringExpression()]
+}
+
 void timestampExpression() :
 {}
 {
@@ -95,18 +103,28 @@ void timestampExpression() :
 
 void booleanExpression() :
 {}
-{
-  (	    LOOKAHEAD(3) numberExpression() <COMPARISON_OPERATOR> numberExpression()
+{	    LOOKAHEAD(3) numberExpression() <COMPARISON_OPERATOR> numberExpression()
 	  | LOOKAHEAD(3) stringExpression() <COMPARISON_OPERATOR> stringExpression()
 	  |  LOOKAHEAD(3) timestampExpression() <COMPARISON_OPERATOR> timestampExpression()
-	)
 //  (numberExpression() | stringExpression()| timestampExpression()) <COMPARISON_OPERATOR> (numberExpression() | stringExpression()  | timestampExpression())
 }
 
 void cellReference() :
 {}
 {
-  <C> numberExpression() <R> numberExpression()
+  <C> numberExpression() <R> numberExpression() ("+" <C> numberExpression() <R> numberExpression())*
+}
+
+void cellReferenceWithVar() :
+{}
+{
+  <C> Cexpr() <R> Cexpr()
+}
+
+void Cexpr():
+{}
+{
+	numberExpression() (("+"| "-") <VARIABLE>)* (<DECIMAL_LITERAL>)*
 }
 
 void differenceOfTimestamps() :
@@ -118,18 +136,19 @@ void differenceOfTimestamps() :
 void assignment() :
 {}
 {
-  cellReference() <ASSIGNEMENT_OPERATOR> expression() [<FORMATTED> stringExpression()]
+  LOOKAHEAD(3) cellReference() <ASSIGNEMENT_OPERATOR> expression() [<FORMATTED> stringExpression()]
+| LOOKAHEAD(3) cellReferenceWithVar() <ASSIGNEMENT_OPERATOR> expression() [<FORMATTED> stringExpression()]
 }
 
 void forLoop() :
 {}
 {
-    <FOR> <VARIABLE> <FROM> expression() <TO> expression()
-    <DO> assignment() <END>
+    <FOR> <VARIABLE> <FROM> expression() <TO> expression() <DO> assignment() <END>
 }
 
 void parse() :
 {}
 {
-    expression() < EOF >
+//    expression() (expression())* < EOF >
+	(assignment() | forLoop())* < EOF >
 }
