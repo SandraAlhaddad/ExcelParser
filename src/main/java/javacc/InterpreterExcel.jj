@@ -6,12 +6,26 @@
         STATIC = false;
         }PARSER_BEGIN(InterpreterExcel)package javacc;
 
-public class InterpreterExcel{  public static void main(String args []) throws ParseException  {        try {
+public class InterpreterExcel{
+  private static List<String> variables; // Store variables and their values
+  private static HashMap<String,String> cells;
+    public static void main(String args []) throws ParseException  {
+        try {
+       		variables = new ArrayList<String>();
+       		cells = new HashMap<String,String>();
             InterpreterExcel parser = new InterpreterExcel(System.in);
             parser.parse();
+            dumpVariables(); // Dump variables at the end of the run
         } catch (Exception e) {
             e.printStackTrace();
-        }  }}PARSER_END(InterpreterExcel)SKIP: {
+        }  }
+
+  private static void dumpVariables() {
+    System.out.println("Dumping variables:");
+    for (String entry : variables) {
+      System.out.println(entry);
+    }
+  }}PARSER_END(InterpreterExcel)SKIP: {
     " " | "\t" | "\n" | "\r"
 }
 
@@ -38,106 +52,549 @@ TOKEN : {
 | <R: "R" >
 | <ASSIGNEMENT_OPERATOR: "=" >
 | <STRING_CONCATENATION_OPERATOR: "&" >
-| <COMPARISON_OPERATOR: "<" | "<=" | "=" | ">=" | ">" | "<>" >
-| <FUNCTION_NAME: "function " (<LETTER>)* >
-| <DIGIT    : ["0"-"9"] >
-| <LETTER   : ["a"-"z","A"-"Z"] >
-| <ALPHANUM : <LETTER> | <DIGIT> >  
-//| <CELL_REFERENCE: "C" <DECIMAL_LITERAL> "R" <DECIMAL_LITERAL>>
+| <COMPARISON_OPERATOR: "<" | "<=" | "==" | ">=" | ">" | "<>" >
+| <FUNCTION_NAME: "function">
 }
 
-void expression() :
-{}
+String expression() :
 {
-    LOOKAHEAD(6) booleanExpression()  | LOOKAHEAD(6) numberExpression()
-  | LOOKAHEAD(6) stringAndCellExpression() 
-  | LOOKAHEAD(6) stringExpression()
-  | LOOKAHEAD(6) timestampExpression()
-  | LOOKAHEAD(6) cellReference()
-  | LOOKAHEAD(6) cellReferenceWithVar()
-//  | LOOKAHEAD(6) assignment()
-//  | LOOKAHEAD(6) forLoop()
-}
-
-void numberExpression():
-{} {
-  LOOKAHEAD(3) functionReturningNumber() | LOOKAHEAD(3) differenceOfTimestamps() | LOOKAHEAD(3) numberLiteral()
-}
-
-void numberLiteral() :
-{}
+  String res;
+  }
 {
-  <DECIMAL_LITERAL> | <FLOATING_POINT_LITERAL> 
+  LOOKAHEAD(6) res = booleanExpression()
+   {
+	return res;
+	}
+  | LOOKAHEAD(6) res = numberExpression() 
+   {
+	return res;
+	}
+  | LOOKAHEAD(6) res = functionReturningNumber() 
+   {
+	return res;
+	}
+  | LOOKAHEAD(6) res = stringAndCellExpression()
+   {
+	return res;
+	}
+  | LOOKAHEAD(6) res = stringExpression()
+     {
+	return res;
+	}
+  | LOOKAHEAD(6) res = timestampExpression()
+       {
+	return res;
+	}
+  | LOOKAHEAD(6) res = cellReference()
+  {
+	return res;
+	}
 }
 
-void functionReturningNumber() :
-{}
+String numberExpression():
 {
-  <FUNCTION_NAME> "(" functionArguments() ")"
+String res;
+  } {
+   LOOKAHEAD(3) res = differenceOfTimestamps()
+  {
+    return res;
+  }
+|   LOOKAHEAD(3) res = numberLiteral()
+  {
+    return res;
+  }
 }
 
-void functionArguments() :
-{}
+String numberLiteral() :
 {
-  (numberExpression() ("," numberExpression())*)
+	Token t;
+	String s;
 }
-
-void stringExpression() :
-{}
 {
-  <STRING_LITERAL> ["&" stringExpression()]
+	t = <DECIMAL_LITERAL>
+	{
+	s = t.image;
+	return s;
 }
-
-void stringAndCellExpression() :
-{}
+	| t = <FLOATING_POINT_LITERAL>
 {
-  LOOKAHEAD(3) cellReference() ["&" stringExpression()]
-| LOOKAHEAD(3) cellReferenceWithVar() ["&" stringExpression()]
+	s = t.image;
+	return s;
+}
 }
 
-void timestampExpression() :
-{}
+String functionReturningNumber() :
 {
-  <TIMESTAMP_LITERAL> ("+" | "-") numberExpression()
-}
-
-void booleanExpression() :
-{}
-{	    LOOKAHEAD(3) numberExpression() <COMPARISON_OPERATOR> numberExpression()
-	  | LOOKAHEAD(3) stringExpression() <COMPARISON_OPERATOR> stringExpression()
-	  |  LOOKAHEAD(3) timestampExpression() <COMPARISON_OPERATOR> timestampExpression()
-//  (numberExpression() | stringExpression()| timestampExpression()) <COMPARISON_OPERATOR> (numberExpression() | stringExpression()  | timestampExpression())
-}
-
-void cellReference() :
-{}
+	String name;
+	String a;
+	String arg;
+	String b;
+	String res;
+	String[] parts;
+	int[] n1;
+	int sum;
+  }
 {
-  <C> numberExpression() <R> numberExpression() ("+" <C> numberExpression() <R> numberExpression())*
+  {
+    sum = 0;
+  }
+  name = <FUNCTION_NAME>.image
+  a = "(".image
+  arg = functionArguments()
+  b = ")".image
+  {
+//	res = name + a + arg + b;
+	parts = arg.split(",");
+	n1 = new int[parts.length];
+	for(int n = 0; n < parts.length; n++) {
+	   n1[n] = Integer.parseInt(parts[n]);
+	   sum = sum + n1[n];
+	}
+	res = String.valueOf(sum);
+	return res;
+  }
 }
 
-void cellReferenceWithVar() :
-{}
+String functionArguments() :
 {
-  <C> Cexpr() <R> Cexpr()
+  String arguments;
+  String comma;
+  String arg;
+  String res;
+  }
+{
+  {
+    comma = "";
+    arg = "";
+  }
+	arguments = numberExpression()
+	(
+	  comma = ",".image
+	  arg = numberExpression()		{
+		  arguments = arguments + comma + arg;
+		}
+	)*
+{
+  return arguments;
+}
 }
 
-void Cexpr():
-{}
+String stringExpression() :
 {
-	numberExpression() (("+"| "-") <VARIABLE>)* (<DECIMAL_LITERAL>)*
+	String s;
+	String amp;
+	String expr;
+	String res;
+  }
+{
+  {
+    amp = "";
+    expr= "";
+  }
+  s = <STRING_LITERAL>.image
+  [
+	amp = "&".image
+	expr = stringExpression()
+  ]
+
+  {
+    res = s + " " + expr;
+    res = res.replace("\'", "");
+    return res;
+  }
 }
 
-void differenceOfTimestamps() :
-{}
+String stringAndCellExpression() :
 {
-    <TIMESTAMP_LITERAL> "-" <TIMESTAMP_LITERAL>
+	String cell;
+	String amp;
+	String expr;
+	String res;
+  }
+{
+  {
+    amp = "";
+    expr = "";
+  }
+  cell = cellReference()
+  [
+	amp = "&".image
+	expr = stringExpression()
+  ]
+  {
+	res = cell + " " + expr;
+	res = res.replace("\'", "");
+	return res;
+  }
+}
+
+String timestampExpression() :
+{
+  String time;
+  String op;
+  String num;
+  String res;
+  LocalDateTime dateTime;
+  int sec;
+  }
+{
+  time = <TIMESTAMP_LITERAL>.image
+  (    op = "+".image
+    | op = "-".image
+   )
+  num = <DECIMAL_LITERAL>.image
+  {
+//	res = time + op + num;
+
+	time = time.replace("{", "");
+	time = time.replace("}", "");
+    dateTime = LocalDateTime.parse(time, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    sec = Integer.parseInt(num);
+    if (op == "-") {
+      // Subtract offset seconds from the timestamp
+      dateTime = dateTime.minusSeconds(sec);
+    } else {
+      // Add offset seconds to the timestamp
+      dateTime = dateTime.plusSeconds(sec);
+    }
+    res = dateTime.toString();
+	return res;
+  }
+}
+
+String booleanExpression() :
+{
+  String expr1;
+  int e1;
+  int e2;
+  String op;
+  String expr2;
+  String res;
+  LocalDateTime dateTime1;
+  LocalDateTime dateTime2;
+  }
+{
+  LOOKAHEAD(3) expr1 = <DECIMAL_LITERAL>.image
+  op = <COMPARISON_OPERATOR>.image
+  expr2 = <DECIMAL_LITERAL>.image
+  {
+//	res = expr1 + op + expr2;
+	e1 = Integer.parseInt(expr1);
+	e2 = Integer.parseInt(expr2);
+	switch(op) {
+	  case "<":
+	  	if(e1 < e2) { 
+	  		res = "true";
+	  		break;
+	 	}else { 
+	  		res = "false";
+	  		break;
+		}
+	  case "<=":
+	  	if(e1 <= e2) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	  case ">":
+	  	if(e1 > e2) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	  case ">=":
+	  	if(e1 >= e2) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	  case "==":
+	  	if(e1 == e2) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	  case "<>":
+	  	if(e1 != e2) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	default:
+	  		res = "false";
+	  		break;
+	}
+	return res;
+  }
+
+|   LOOKAHEAD(3) expr1 = stringExpression()
+  op = <COMPARISON_OPERATOR>.image
+  expr2 = stringExpression()
+  {
+//	res = expr1 + op + expr2;
+	switch(op) {
+	  case "<":
+	  	if(expr1.length() < expr2.length()) { 
+	  		res = "true";
+	  		break;
+	 	}else { 
+	  		res = "false";
+	  		break;
+		}
+	  case "<=":
+	  	if(expr1.length() <= expr2.length()) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	  case ">":
+	  	if(expr1.length() > expr2.length()) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	  case ">=":
+	  	if(expr1.length() >= expr2.length()) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	  case "==":
+	  	if(expr1.equals(expr2)) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	  case "<>":
+	  	if(!expr1.equals(expr2)) {
+			res = "true";
+			break;
+	  	}else {
+			res = "false";
+			break;
+	  	}
+	default:
+	  		res = "false";
+	  		break;
+	}
+	return res;
+  }
+  
+|   LOOKAHEAD(3) expr1 = <TIMESTAMP_LITERAL>.image
+  op = <COMPARISON_OPERATOR>.image
+  expr2 = <TIMESTAMP_LITERAL>.image
+  {
+//	res = expr1 + op + expr2;
+	expr1 = expr1.replace("{", "");
+	expr1 = expr1.replace("}", "");
+	expr2 = expr2.replace("{", "");
+	expr2 = expr2.replace("}", "");
+    dateTime1 = LocalDateTime.parse(expr1, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    dateTime2 = LocalDateTime.parse(expr2, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    int comparisonResult = dateTime1.compareTo(dateTime2);
+    switch (op) {
+      case "<":
+      	if(comparisonResult < 0) { 
+        	res = "True" ;
+        	break;
+       } else {
+			res = "false";
+			break;
+       }
+      case "<=":
+      	if(comparisonResult <= 0) { 
+        	res = "True" ;
+        	break;
+       } else {
+			res = "false";
+			break;
+       }
+      case "==":
+      	if(comparisonResult == 0) { 
+        	res = "True" ;
+        	break;
+       } else {
+			res = "false";
+			break;
+       }
+      case ">=":
+      	if(comparisonResult >= 0) { 
+        	res = "True" ;
+        	break;
+       } else {
+			res = "false";
+			break;
+       }
+      case ">":
+      	if(comparisonResult > 0) { 
+        	res = "True" ;
+        	break;
+       } else {
+			res = "false";
+			break;
+       }
+      case "<>":
+      	if(comparisonResult != 0) { 
+        	res = "True" ;
+        	break;
+       } else {
+			res = "false";
+			break;
+       }
+      default:
+      	res = "false";
+      	break;
+     }
+	return res;
+  }
+}
+
+String cellReferenceWithVar() :
+{
+  String c;
+  String exp1;
+  String r;
+  String exp2;
+  String res;
+  }
+{
+  c = <C>.image
+  exp1 = Cexpr()
+  r = <R>.image
+  exp2 = Cexpr()
+  {
+    res = c + exp1 + r + exp2;
+    return res;
+  }
+}
+
+String cellReference() :
+{
+  String c;
+  String exp1;
+  String r;
+  String exp2;
+  String res;
+  String cell;
+  }
+{
+  c = <C>.image
+  exp1 = Cexpr()
+  r = <R>.image
+  exp2 = Cexpr()
+  {
+    cell = c + exp1 + r + exp2;
+	res = cells.get(cell);
+    return res;
+  }
+}
+
+String Cexpr():
+{
+	String num;
+	String op;
+	String var;
+	String dec;
+	String res;
+  }
+{
+  {
+    op = "";
+    var ="";
+    dec = "";
+  }
+	num = numberExpression()
+	(
+	  (	    op = "+".image
+		| op = "-".image
+		)
+	  var = <VARIABLE>.image
+	 )*
+
+	 (
+	   dec = <DECIMAL_LITERAL>.image
+	  )*
+
+	  {
+	    res = num + op + var + dec;
+	    return res;
+	  }
+}
+
+String differenceOfTimestamps() :
+{
+	String time1;
+	String op;
+	String time2;
+	String res;
+	LocalDateTime dateTime1;
+	LocalDateTime dateTime2;
+	Duration duration;
+	long differenceInSeconds;
+  }
+{
+	time1 = <TIMESTAMP_LITERAL>.image
+	op = "-".image
+	time2 = <TIMESTAMP_LITERAL>.image
+	{
+//	res = time1 + op + time2;
+	time1 = time1.replace("{", "");
+	time1 = time1.replace("}", "");
+	time2 = time2.replace("{", "");
+	time2 = time2.replace("}", "");
+    dateTime1 = LocalDateTime.parse(time1, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    dateTime2 = LocalDateTime.parse(time2, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    duration = Duration.between(dateTime1, dateTime2);
+    differenceInSeconds = duration.getSeconds();
+    res = String.valueOf(differenceInSeconds);
+	return res;
+	}
 }
 
 void assignment() :
-{}
 {
-  LOOKAHEAD(3) cellReference() <ASSIGNEMENT_OPERATOR> expression() [<FORMATTED> stringExpression()]
-| LOOKAHEAD(3) cellReferenceWithVar() <ASSIGNEMENT_OPERATOR> expression() [<FORMATTED> stringExpression()]
+  String cell;
+  String op;
+  String exp;
+  String format;
+  String stexp;
+  String res;
+  }
+{
+    {
+	format = "";
+	stexp = "";
+  }
+  cell = cellReferenceWithVar()
+  op = <ASSIGNEMENT_OPERATOR>.image
+  exp = expression()
+  [
+	format = <FORMATTED>.image
+	stexp = stringExpression()
+  ]
+  {
+    res = cell + op + exp + format + stexp;
+	variables.add(res);
+	cells.put(cell,exp);
+  }
 }
 
 void forLoop() :
@@ -150,5 +607,5 @@ void parse() :
 {}
 {
 //    expression() (expression())* < EOF >
-	(assignment() | forLoop())* < EOF >
+	(assignment() | forLoop())* <EOF>
 }
