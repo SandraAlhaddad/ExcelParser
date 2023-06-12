@@ -5,6 +5,12 @@
         IGNORE_CASE = true;
         STATIC = false;
         }PARSER_BEGIN(InterpreterExcel)package javacc;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class InterpreterExcel{
   private static List<String> variables; // Store variables and their values
@@ -35,8 +41,8 @@ TOKEN : {
 | <FLOATING_POINT_LITERAL: ( "+" | "-" )?
           (
             (["0"-"9"])+ "E"( "+" | "-" )?(["0"-"9"])+
-            | "\\." (["0"-"9"])+ ( "E" ( "+" | "-" )? (["0"-"9"])+ )?
-            | (["0"-"9"])+ "\\." (["0"-"9"])* ( "E" ( "+" | "-" )? (["0"-"9"])+ )?
+            | "." (["0"-"9"])+ ( "E" ( "+" | "-" )? (["0"-"9"])+ )?
+            | (["0"-"9"])+ "." (["0"-"9"])* ( "E" ( "+" | "-" )? (["0"-"9"])+ )?
           )
       >
 | <STRING_LITERAL: "'" ( ~["'"] | "''" )* "'" >
