@@ -583,6 +583,7 @@ void assignment() :
   String format;
   String stexp;
   String res;
+  String form;
   }
 {
     {
@@ -595,6 +596,7 @@ void assignment() :
   [
 	format = <FORMATTED>.image
 	stexp = stringExpression()
+//	form = String.format(stexp, exp)
   ]
   {
     res = cell + op + exp + format + stexp;
@@ -603,10 +605,134 @@ void assignment() :
   }
 }
 
-void forLoop() :
-{}
+//////// assignment for loop
+void forAssignment(int e1, int e2) :
 {
-    <FOR> <VARIABLE> <FROM> expression() <TO> expression() <DO> assignment() <END>
+  String cell;
+  String op;
+  String exp;
+  String format;
+  String stexp;
+  String res;
+  String form;
+  String cell1;
+  }
+{
+    {
+	format = "";
+	stexp = "";
+  }
+  cell = cellReferenceWithVar()
+  op = <ASSIGNEMENT_OPERATOR>.image
+  exp = expression()
+  [
+	format = <FORMATTED>.image
+	stexp = stringExpression()
+//	form = String.format(stexp, exp)
+  ]
+  {
+    for(int i = e1; i <= e2 ; i++) {
+//	    cell1 = forCellReference(cell,i);
+	    res = cell + op + exp + format + stexp;
+	    System.out.println(res);
+		variables.add(res);
+		cells.put(cell,exp);
+}
+  }
+}
+
+String forCellReferenceWithVar(String s, int j) :
+{
+  String c;
+  String exp1;
+  String r;
+  String exp2;
+  String res;
+  String cell;
+  }
+{
+  /////// split cell to c exp1 r exp2
+    {
+  c = String.valueOf(s.charAt(0));
+  exp1 = forCexpr(j);
+  r = s;
+  exp2 = forCexpr(j);
+
+    cell = c + exp1 + r + exp2;
+    System.out.println(cell);
+    return cell;
+  }
+}
+
+String forCexpr(int j):
+{
+	String num;
+	String op;
+	String var;
+	String dec;
+	String res;
+	int val;
+	int decval;
+	int resval;
+	int numval;
+  }
+{
+  {
+    op = "";
+    var ="";
+    dec = "";
+    val = 0;
+    decval = 0;
+    resval = 0;
+  }
+	num = <DECIMAL_LITERAL>.image
+	(
+	  (
+	    op = "+".image
+		| op = "-".image
+		)
+	  var = <VARIABLE>.image
+	 )*
+
+	 (
+	   dec = <DECIMAL_LITERAL>.image
+	  )*
+
+	  {
+//	    decval = Integer.parseInt(dec);
+	    numval = Integer.parseInt(num);
+	    if (op.equals("+")) { 
+	    	resval = numval + j;
+	  }else if (op.equals("-"))
+	    	resval = numval - j;
+	    else
+	    	resval = numval;
+	    res = String.valueOf(resval);
+	    return res;
+	  }
+}
+
+
+void forLoop() :
+{
+	String exp1;
+	String exp2;
+	int e1;
+	int e2;
+  }
+{
+//    <FOR> <VARIABLE> <FROM> expression() <TO> expression() <DO> assignment() <END>
+    <FOR> <VARIABLE> <FROM>
+    exp1 = expression()
+    <TO>
+    exp2 = expression()
+    <DO>
+{
+  	e1 = Integer.parseInt(exp1);
+  	e2 = Integer.parseInt(exp2);
+	forAssignment(e1, e2);
+}
+    <END>
 }
 
 void parse() :

@@ -554,6 +554,7 @@ String res;
   String format;
   String stexp;
   String res;
+  String form;
         format = "";
         stexp = "";
     cell = cellReferenceWithVar();
@@ -573,20 +574,144 @@ String res;
         cells.put(cell,exp);
   }
 
+//////// assignment for loop
+  final public void forAssignment(int e1, int e2) throws ParseException {
+  String cell;
+  String op;
+  String exp;
+  String format;
+  String stexp;
+  String res;
+  String form;
+  String cell1;
+        format = "";
+        stexp = "";
+    cell = cellReferenceWithVar();
+    op = jj_consume_token(ASSIGNEMENT_OPERATOR).image;
+    exp = expression();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case FORMATTED:
+      format = jj_consume_token(FORMATTED).image;
+      stexp = stringExpression();
+      break;
+    default:
+      jj_la1[9] = jj_gen;
+      ;
+    }
+    for(int i = e1; i <= e2 ; i++) {
+//	    cell1 = forCellReference(cell,i);
+            res = cell + op + exp + format + stexp;
+            System.out.println(res);
+                variables.add(res);
+                cells.put(cell,exp);
+}
+  }
+
+  final public String forCellReferenceWithVar(String s, int j) throws ParseException {
+  String c;
+  String exp1;
+  String r;
+  String exp2;
+  String res;
+  String cell;
+  c = String.valueOf(s.charAt(0));
+  exp1 = forCexpr(j);
+  r = s;
+  exp2 = forCexpr(j);
+
+    cell = c + exp1 + r + exp2;
+    System.out.println(cell);
+    {if (true) return cell;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String forCexpr(int j) throws ParseException {
+        String num;
+        String op;
+        String var;
+        String dec;
+        String res;
+        int val;
+        int decval;
+        int resval;
+        int numval;
+    op = "";
+    var ="";
+    dec = "";
+    val = 0;
+    decval = 0;
+    resval = 0;
+    num = jj_consume_token(DECIMAL_LITERAL).image;
+    label_4:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 25:
+      case 26:
+        ;
+        break;
+      default:
+        jj_la1[10] = jj_gen;
+        break label_4;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 25:
+        op = jj_consume_token(25).image;
+        break;
+      case 26:
+        op = jj_consume_token(26).image;
+        break;
+      default:
+        jj_la1[11] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      var = jj_consume_token(VARIABLE).image;
+    }
+    label_5:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case DECIMAL_LITERAL:
+        ;
+        break;
+      default:
+        jj_la1[12] = jj_gen;
+        break label_5;
+      }
+      dec = jj_consume_token(DECIMAL_LITERAL).image;
+    }
+//	    decval = Integer.parseInt(dec);
+            numval = Integer.parseInt(num);
+            if (op.equals("+")) {
+                resval = numval + j;
+          }else if (op.equals("-"))
+                resval = numval - j;
+            else
+                resval = numval;
+            res = String.valueOf(resval);
+            {if (true) return res;}
+    throw new Error("Missing return statement in function");
+  }
+
   final public void forLoop() throws ParseException {
+        String exp1;
+        String exp2;
+        int e1;
+        int e2;
     jj_consume_token(FOR);
     jj_consume_token(VARIABLE);
     jj_consume_token(FROM);
-    expression();
+    exp1 = expression();
     jj_consume_token(TO);
-    expression();
+    exp2 = expression();
     jj_consume_token(DO);
-    assignment();
+        e1 = Integer.parseInt(exp1);
+        e2 = Integer.parseInt(exp2);
+        forAssignment(e1, e2);
     jj_consume_token(END);
   }
 
   final public void parse() throws ParseException {
-    label_4:
+    label_6:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case FOR:
@@ -594,8 +719,8 @@ String res;
         ;
         break;
       default:
-        jj_la1[9] = jj_gen;
-        break label_4;
+        jj_la1[13] = jj_gen;
+        break label_6;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case C:
@@ -605,7 +730,7 @@ String res;
         forLoop();
         break;
       default:
-        jj_la1[10] = jj_gen;
+        jj_la1[14] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -698,11 +823,11 @@ String res;
   }
 
   private boolean jj_3_2() {
-    if (jj_3R_6()) return true;
+    if (jj_3R_8()) return true;
     return false;
   }
 
-  private boolean jj_3R_21() {
+  private boolean jj_3R_23() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_scan_token(25)) {
@@ -714,29 +839,29 @@ String res;
   }
 
   private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
+    if (jj_3R_7()) return true;
     return false;
   }
 
-  private boolean jj_3R_16() {
+  private boolean jj_3R_18() {
     if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
-    if (jj_3R_9()) return true;
+    if (jj_3R_11()) return true;
     return false;
   }
 
   private boolean jj_3_11() {
-    if (jj_3R_9()) return true;
+    if (jj_3R_11()) return true;
     if (jj_scan_token(COMPARISON_OPERATOR)) return true;
-    if (jj_3R_9()) return true;
+    if (jj_3R_11()) return true;
     return false;
   }
 
   private boolean jj_3_9() {
-    if (jj_3R_13()) return true;
+    if (jj_3R_15()) return true;
     return false;
   }
 
-  private boolean jj_3R_10() {
+  private boolean jj_3R_12() {
     if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
     Token xsp;
     xsp = jj_scanpos;
@@ -749,11 +874,11 @@ String res;
   }
 
   private boolean jj_3_8() {
-    if (jj_3R_12()) return true;
+    if (jj_3R_14()) return true;
     return false;
   }
 
-  private boolean jj_3R_6() {
+  private boolean jj_3R_8() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3_8()) {
@@ -763,12 +888,12 @@ String res;
     return false;
   }
 
-  private boolean jj_3R_17() {
-    if (jj_3R_6()) return true;
+  private boolean jj_3R_19() {
+    if (jj_3R_8()) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_21()) { jj_scanpos = xsp; break; }
+      if (jj_3R_23()) { jj_scanpos = xsp; break; }
     }
     while (true) {
       xsp = jj_scanpos;
@@ -777,15 +902,15 @@ String res;
     return false;
   }
 
-  private boolean jj_3R_9() {
+  private boolean jj_3R_11() {
     if (jj_scan_token(STRING_LITERAL)) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_16()) jj_scanpos = xsp;
+    if (jj_3R_18()) jj_scanpos = xsp;
     return false;
   }
 
-  private boolean jj_3R_12() {
+  private boolean jj_3R_14() {
     if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
     if (jj_scan_token(26)) return true;
     if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
@@ -799,7 +924,7 @@ String res;
     return false;
   }
 
-  private boolean jj_3R_5() {
+  private boolean jj_3R_7() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3_10()) {
@@ -812,56 +937,56 @@ String res;
     return false;
   }
 
-  private boolean jj_3R_7() {
+  private boolean jj_3R_9() {
     if (jj_scan_token(FUNCTION_NAME)) return true;
     if (jj_scan_token(22)) return true;
-    if (jj_3R_14()) return true;
+    if (jj_3R_16()) return true;
     if (jj_scan_token(23)) return true;
     return false;
   }
 
   private boolean jj_3_7() {
+    if (jj_3R_13()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_17() {
+    if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
     if (jj_3R_11()) return true;
     return false;
   }
 
-  private boolean jj_3R_15() {
-    if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
-    if (jj_3R_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_20() {
+  private boolean jj_3R_22() {
     if (jj_scan_token(24)) return true;
-    if (jj_3R_6()) return true;
+    if (jj_3R_8()) return true;
     return false;
   }
 
   private boolean jj_3_6() {
-    if (jj_3R_10()) return true;
+    if (jj_3R_12()) return true;
     return false;
   }
 
   private boolean jj_3_5() {
-    if (jj_3R_9()) return true;
+    if (jj_3R_11()) return true;
     return false;
   }
 
-  private boolean jj_3R_19() {
+  private boolean jj_3R_21() {
     if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
     return false;
   }
 
-  private boolean jj_3R_11() {
+  private boolean jj_3R_13() {
     if (jj_scan_token(C)) return true;
-    if (jj_3R_17()) return true;
+    if (jj_3R_19()) return true;
     if (jj_scan_token(R)) return true;
-    if (jj_3R_17()) return true;
+    if (jj_3R_19()) return true;
     return false;
   }
 
   private boolean jj_3_4() {
-    if (jj_3R_8()) return true;
+    if (jj_3R_10()) return true;
     return false;
   }
 
@@ -872,40 +997,40 @@ String res;
     return false;
   }
 
-  private boolean jj_3R_8() {
-    if (jj_3R_11()) return true;
+  private boolean jj_3R_10() {
+    if (jj_3R_13()) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_15()) jj_scanpos = xsp;
+    if (jj_3R_17()) jj_scanpos = xsp;
     return false;
   }
 
   private boolean jj_3_3() {
-    if (jj_3R_7()) return true;
+    if (jj_3R_9()) return true;
     return false;
   }
 
-  private boolean jj_3R_18() {
+  private boolean jj_3R_20() {
     if (jj_scan_token(DECIMAL_LITERAL)) return true;
     return false;
   }
 
-  private boolean jj_3R_13() {
+  private boolean jj_3R_15() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_18()) {
+    if (jj_3R_20()) {
     jj_scanpos = xsp;
-    if (jj_3R_19()) return true;
+    if (jj_3R_21()) return true;
     }
     return false;
   }
 
-  private boolean jj_3R_14() {
-    if (jj_3R_6()) return true;
+  private boolean jj_3R_16() {
+    if (jj_3R_8()) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_20()) { jj_scanpos = xsp; break; }
+      if (jj_3R_22()) { jj_scanpos = xsp; break; }
     }
     return false;
   }
@@ -921,13 +1046,13 @@ String res;
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[11];
+  final private int[] jj_la1 = new int[15];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x60,0x1000000,0x80000,0x80000,0x6000000,0x6000000,0x6000000,0x20,0x400,0x10800,0x10800,};
+      jj_la1_0 = new int[] {0x60,0x1000000,0x80000,0x80000,0x6000000,0x6000000,0x6000000,0x20,0x400,0x400,0x6000000,0x6000000,0x20,0x10800,0x10800,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[12];
   private boolean jj_rescan = false;
@@ -944,7 +1069,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -959,7 +1084,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -970,7 +1095,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -981,7 +1106,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -991,7 +1116,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1001,7 +1126,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1118,7 +1243,7 @@ String res;
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 11; i++) {
+    for (int i = 0; i < 15; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
