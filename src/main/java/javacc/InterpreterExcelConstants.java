@@ -44,6 +44,20 @@ public interface InterpreterExcelConstants {
   int COMPARISON_OPERATOR = 20;
   /** RegularExpression Id. */
   int FUNCTION_NAME = 21;
+  /** RegularExpression Id. */
+  int ADD = 22;
+  /** RegularExpression Id. */
+  int SUB = 23;
+  /** RegularExpression Id. */
+  int MOD = 24;
+  /** RegularExpression Id. */
+  int DIV = 25;
+  /** RegularExpression Id. */
+  int MUL = 26;
+  /** RegularExpression Id. */
+  int OPENPAR = 27;
+  /** RegularExpression Id. */
+  int CLOSEPAR = 28;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -72,11 +86,14 @@ public interface InterpreterExcelConstants {
     "\"&\"",
     "<COMPARISON_OPERATOR>",
     "\"function\"",
+    "\"+\"",
+    "\"-\"",
+    "\"%\"",
+    "\"/\"",
+    "\"*\"",
     "\"(\"",
     "\")\"",
     "\",\"",
-    "\"+\"",
-    "\"-\"",
   };
 
 }

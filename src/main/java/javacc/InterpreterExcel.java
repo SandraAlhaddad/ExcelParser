@@ -33,26 +33,20 @@ public class InterpreterExcel implements InterpreterExcelConstants {
 
   final public String expression() throws ParseException {
   String res;
-    if (jj_2_1(6)) {
+    if (jj_2_1(20)) {
+      res = variable();
+        {if (true) return res;}
+    } else if (jj_2_2(20)) {
       res = booleanExpression();
         {if (true) return res;}
-    } else if (jj_2_2(6)) {
+    } else if (jj_2_3(20)) {
       res = numberExpression();
         {if (true) return res;}
-    } else if (jj_2_3(6)) {
+    } else if (jj_2_4(20)) {
       res = functionReturningNumber();
         {if (true) return res;}
-    } else if (jj_2_4(6)) {
-      res = stringAndCellExpression();
-        {if (true) return res;}
-    } else if (jj_2_5(6)) {
-      res = stringExpression();
-        {if (true) return res;}
-    } else if (jj_2_6(6)) {
+    } else if (jj_2_5(20)) {
       res = timestampExpression();
-        {if (true) return res;}
-    } else if (jj_2_7(6)) {
-      res = cellReference();
         {if (true) return res;}
     } else {
       jj_consume_token(-1);
@@ -63,13 +57,21 @@ public class InterpreterExcel implements InterpreterExcelConstants {
 
   final public String numberExpression() throws ParseException {
 String res;
-    if (jj_2_8(3)) {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case TIMESTAMP_LITERAL:
       res = differenceOfTimestamps();
     {if (true) return res;}
-    } else if (jj_2_9(3)) {
+      break;
+    case DECIMAL_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case STRING_LITERAL:
+    case OPENPAR:
       res = numberLiteral();
+//    System.out.println("nb expression");
     {if (true) return res;}
-    } else {
+      break;
+    default:
+      jj_la1[0] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -77,21 +79,125 @@ String res;
   }
 
   final public String numberLiteral() throws ParseException {
-        Token t;
-        String s;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case DECIMAL_LITERAL:
-      t = jj_consume_token(DECIMAL_LITERAL);
-        s = t.image;
-        {if (true) return s;}
-      break;
-    case FLOATING_POINT_LITERAL:
-      t = jj_consume_token(FLOATING_POINT_LITERAL);
-        s = t.image;
-        {if (true) return s;}
-      break;
-    default:
-      jj_la1[0] = jj_gen;
+String firstTerm = "";
+String secondTerm = "";
+String op = "";
+String res = "";
+Double dval = 0.0;
+    //	(
+              firstTerm = term();
+    label_1:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case STRING_CONCATENATION_OPERATOR:
+      case ADD:
+      case SUB:
+        ;
+        break;
+      default:
+        jj_la1[1] = jj_gen;
+        break label_1;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case ADD:
+        op = jj_consume_token(ADD).image;
+        secondTerm = term();
+        dval = Double.parseDouble(firstTerm);
+            firstTerm = String.valueOf(dval);
+        Double firstTerm1 = Double.parseDouble(firstTerm);
+        Double secondTerm1 = Double.parseDouble(secondTerm);
+        firstTerm = String.valueOf(firstTerm1 + secondTerm1);
+        break;
+      case SUB:
+        op = jj_consume_token(SUB).image;
+        secondTerm = term();
+        dval = Double.parseDouble(firstTerm);
+            firstTerm = String.valueOf(dval);
+        Double firstTerm2 = Double.parseDouble(firstTerm);
+        Double secondTerm2 = Double.parseDouble(secondTerm);
+        firstTerm = String.valueOf(firstTerm2 - secondTerm2);
+        break;
+      case STRING_CONCATENATION_OPERATOR:
+        op = jj_consume_token(STRING_CONCATENATION_OPERATOR).image;
+        secondTerm = term();
+       firstTerm = firstTerm + " " + secondTerm;
+        firstTerm = firstTerm.replace("\u005c'", "");
+        break;
+      default:
+        jj_la1[2] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    }
+        {if (true) return firstTerm;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String term() throws ParseException {
+ String firstFactor = "";
+ String secondFactor = "";
+ String op = "";
+ String res = "";
+    firstFactor = factor();
+    label_2:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case MOD:
+      case DIV:
+      case MUL:
+        ;
+        break;
+      default:
+        jj_la1[3] = jj_gen;
+        break label_2;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case MUL:
+        op = jj_consume_token(MUL).image;
+        secondFactor = factor();
+        Double firstFactor1 = Double.parseDouble(firstFactor);
+        Double secondFactor1 = Double.parseDouble(secondFactor);
+        firstFactor = String.valueOf(firstFactor1 * secondFactor1);
+        break;
+      case DIV:
+        op = jj_consume_token(DIV).image;
+        secondFactor = factor();
+        Double firstFactor2 = Double.parseDouble(firstFactor);
+        Double secondFactor2 = Double.parseDouble(secondFactor);
+        firstFactor = String.valueOf(firstFactor2 / secondFactor2);
+        break;
+      case MOD:
+        op = jj_consume_token(MOD).image;
+        secondFactor = factor();
+        Double firstFactor3 = Double.parseDouble(firstFactor);
+        Double secondFactor3 = Double.parseDouble(secondFactor);
+        firstFactor = String.valueOf(firstFactor3 % secondFactor3);
+        break;
+      default:
+        jj_la1[4] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    }
+    {if (true) return firstFactor;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String factor() throws ParseException {
+        String fac = "";
+    if (jj_2_6(3)) {
+      fac = jj_consume_token(DECIMAL_LITERAL).image;
+        {if (true) return fac;}
+    } else if (jj_2_7(3)) {
+      fac = jj_consume_token(FLOATING_POINT_LITERAL).image;
+                {if (true) return fac;}
+    } else if (jj_2_8(3)) {
+      fac = cellReference();
+                {if (true) return fac;}
+    } else if (jj_2_9(3)) {
+      fac = jj_consume_token(STRING_LITERAL).image;
+                {if (true) return fac;}
+    } else {
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -105,18 +211,17 @@ String res;
         String b;
         String res;
         String[] parts;
-        int[] n1;
-        int sum;
-    sum = 0;
+        Double[] n1;
+        Double sum = 0.0;
     name = jj_consume_token(FUNCTION_NAME).image;
-    a = jj_consume_token(22).image;
+    a = jj_consume_token(OPENPAR).image;
     arg = functionArguments();
-    b = jj_consume_token(23).image;
+    b = jj_consume_token(CLOSEPAR).image;
 //	res = name + a + arg + b;
         parts = arg.split(",");
-        n1 = new int[parts.length];
+        n1 = new Double[parts.length];
         for(int n = 0; n < parts.length; n++) {
-           n1[n] = Integer.parseInt(parts[n]);
+           n1[n] = Double.parseDouble(parts[n]);
            sum = sum + n1[n];
         }
         res = String.valueOf(sum);
@@ -125,24 +230,22 @@ String res;
   }
 
   final public String functionArguments() throws ParseException {
-  String arguments;
-  String comma;
-  String arg;
-  String res;
-    comma = "";
-    arg = "";
+  String arguments = "";
+  String comma = "";
+  String arg = "";
+  String res = "";
     arguments = numberExpression();
-    label_1:
+    label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 24:
+      case 29:
         ;
         break;
       default:
-        jj_la1[1] = jj_gen;
-        break label_1;
+        jj_la1[5] = jj_gen;
+        break label_3;
       }
-      comma = jj_consume_token(24).image;
+      comma = jj_consume_token(29).image;
       arg = numberExpression();
                   arguments = arguments + comma + arg;
     }
@@ -151,20 +254,29 @@ String res;
   }
 
   final public String stringExpression() throws ParseException {
-        String s;
-        String amp;
-        String expr;
-        String res;
-    amp = "";
-    expr= "";
-    s = jj_consume_token(STRING_LITERAL).image;
+        String s = "";
+        String amp = "";
+        String expr = "";
+        String res = "";
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case STRING_LITERAL:
+      s = jj_consume_token(STRING_LITERAL).image;
+      break;
+    case OPENPAR:
+      s = cellReference();
+      break;
+    default:
+      jj_la1[6] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case STRING_CONCATENATION_OPERATOR:
       amp = jj_consume_token(STRING_CONCATENATION_OPERATOR).image;
       expr = stringExpression();
       break;
     default:
-      jj_la1[2] = jj_gen;
+      jj_la1[7] = jj_gen;
       ;
     }
     res = s + " " + expr;
@@ -173,26 +285,107 @@ String res;
     throw new Error("Missing return statement in function");
   }
 
-  final public String stringAndCellExpression() throws ParseException {
-        String cell;
-        String amp;
-        String expr;
-        String res;
-    amp = "";
-    expr = "";
+  final public String cellExpression() throws ParseException {
+        String cell = "";
+        String amp = "";
+        String expr = "";
+        String res = "";
     cell = cellReference();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case STRING_CONCATENATION_OPERATOR:
-      amp = jj_consume_token(STRING_CONCATENATION_OPERATOR).image;
-      expr = stringExpression();
+    case DECIMAL_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case STRING_LITERAL:
+    case TIMESTAMP_LITERAL:
+    case VARIABLE:
+    case FUNCTION_NAME:
+    case OPENPAR:
+      expr = expression();
       break;
     default:
-      jj_la1[3] = jj_gen;
+      jj_la1[8] = jj_gen;
       ;
     }
         res = cell + " " + expr;
         res = res.replace("\u005c'", "");
         {if (true) return res;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String variable() throws ParseException {
+        String var = "";
+        String val = "";
+        String op = "";
+        String expr = "";
+        Double res = 0.0;
+        String result = "";
+        String var2 = "";
+        String varop = "";
+        String variables = "";
+        Double valnum= 0.0;
+    var = jj_consume_token(VARIABLE).image;
+    val = cells.get(var);
+    if (val == null)
+        variables = "+" + var;
+    else {
+                valnum = Double.parseDouble(val);
+                res = valnum;
+        }
+    label_4:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case ADD:
+      case SUB:
+        ;
+        break;
+      default:
+        jj_la1[9] = jj_gen;
+        break label_4;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case ADD:
+        op = jj_consume_token(ADD).image;
+        break;
+      case SUB:
+        op = jj_consume_token(SUB).image;
+        break;
+      default:
+        jj_la1[10] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case VARIABLE:
+        var2 = jj_consume_token(VARIABLE).image;
+//		variables = variables + op + var2;
+                    val = cells.get(var2);
+            if (val == null)
+                variables = variables + op + var2;
+            else {
+                        valnum = Double.parseDouble(val);
+                        res = res + valnum;
+                  }
+        break;
+      case DECIMAL_LITERAL:
+      case FLOATING_POINT_LITERAL:
+      case STRING_LITERAL:
+      case TIMESTAMP_LITERAL:
+      case OPENPAR:
+        expr = numberExpression();
+                Double num = Double.parseDouble(expr);
+                if (op.equals("+")) {
+                        res = res + num;
+                } else if (op.equals("-")) {
+                        res = res - num;
+                }
+        break;
+      default:
+        jj_la1[11] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    }
+    result = String.valueOf(res) + variables;
+        {if (true) return result;}
     throw new Error("Missing return statement in function");
   }
 
@@ -205,14 +398,14 @@ String res;
   int sec;
     time = jj_consume_token(TIMESTAMP_LITERAL).image;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 25:
-      op = jj_consume_token(25).image;
+    case ADD:
+      op = jj_consume_token(ADD).image;
       break;
-    case 26:
-      op = jj_consume_token(26).image;
+    case SUB:
+      op = jj_consume_token(SUB).image;
       break;
     default:
-      jj_la1[4] = jj_gen;
+      jj_la1[12] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -237,20 +430,20 @@ String res;
 
   final public String booleanExpression() throws ParseException {
   String expr1;
-  int e1;
-  int e2;
+  Double e1;
+  Double e2;
   String op;
   String expr2;
-  String res;
+  String res = "";
   LocalDateTime dateTime1;
   LocalDateTime dateTime2;
     if (jj_2_10(3)) {
-      expr1 = jj_consume_token(DECIMAL_LITERAL).image;
+      expr1 = numberExpression();
       op = jj_consume_token(COMPARISON_OPERATOR).image;
-      expr2 = jj_consume_token(DECIMAL_LITERAL).image;
+      expr2 = numberExpression();
 //	res = expr1 + op + expr2;
-        e1 = Integer.parseInt(expr1);
-        e2 = Integer.parseInt(expr2);
+        e1 = Double.parseDouble(expr1);
+        e2 = Double.parseDouble(expr2);
         switch(op) {
           case "<":
                 if(e1 < e2) {
@@ -309,66 +502,31 @@ String res;
       expr1 = stringExpression();
       op = jj_consume_token(COMPARISON_OPERATOR).image;
       expr2 = stringExpression();
-//	res = expr1 + op + expr2;
         switch(op) {
-          case "<":
-                if(expr1.length() < expr2.length()) {
-                        res = "true";
-                        break;
-                }else {
-                        res = "false";
-                        break;
-                }
-          case "<=":
-                if(expr1.length() <= expr2.length()) {
-                        res = "true";
-                        break;
-                }else {
-                        res = "false";
-                        break;
-                }
-          case ">":
-                if(expr1.length() > expr2.length()) {
-                        res = "true";
-                        break;
-                }else {
-                        res = "false";
-                        break;
-                }
-          case ">=":
-                if(expr1.length() >= expr2.length()) {
-                        res = "true";
-                        break;
-                }else {
-                        res = "false";
-                        break;
-                }
-          case "==":
-                if(expr1.equals(expr2)) {
-                        res = "true";
-                        break;
-                }else {
-                        res = "false";
-                        break;
-                }
-          case "<>":
-                if(!expr1.equals(expr2)) {
-                        res = "true";
-                        break;
-                }else {
-                        res = "false";
-                        break;
-                }
-        default:
-                        res = "false";
-                        break;
-        }
+            case "<":
+                res = String.valueOf(expr1.compareTo(expr2) < 0);
+                break;
+            case "<=":
+                res = String.valueOf(expr1.compareTo(expr2) <= 0);
+                break;
+            case "==":
+                res = String.valueOf(expr1.compareTo(expr2) == 0);
+                break;
+            case ">=":
+                res = String.valueOf(expr1.compareTo(expr2) >= 0);
+                break;
+            case ">":
+                res = String.valueOf(expr1.compareTo(expr2) > 0);
+                break;
+            case "<>":
+                res = String.valueOf(expr1.compareTo(expr2) != 0);
+                break;
+              }
         {if (true) return res;}
     } else if (jj_2_12(3)) {
       expr1 = jj_consume_token(TIMESTAMP_LITERAL).image;
       op = jj_consume_token(COMPARISON_OPERATOR).image;
       expr2 = jj_consume_token(TIMESTAMP_LITERAL).image;
-//	res = expr1 + op + expr2;
         expr1 = expr1.replace("{", "");
         expr1 = expr1.replace("}", "");
         expr2 = expr2.replace("{", "");
@@ -459,64 +617,40 @@ String res;
   String exp2;
   String res;
   String cell;
+  Double val1;
+  Double val2;
+    jj_consume_token(OPENPAR);
     c = jj_consume_token(C).image;
-    exp1 = Cexpr();
+    exp1 = numberExpression();
+    val1= Double.parseDouble(exp1);
+  exp1=String.valueOf(val1);
+  System.out.println("exp1 " + exp1);
     r = jj_consume_token(R).image;
-    exp2 = Cexpr();
+    exp2 = numberExpression();
+       val2= Double.parseDouble(exp2);
+  exp2=String.valueOf(val2);
+  System.out.println("exp2 " + exp2);
+    jj_consume_token(CLOSEPAR);
     cell = c + exp1 + r + exp2;
+    System.out.println("cell " + cell);
         res = cells.get(cell);
+        if (res == null)
+                res = "0";
     {if (true) return res;}
     throw new Error("Missing return statement in function");
   }
 
   final public String Cexpr() throws ParseException {
-        String num;
-        String op;
-        String var;
-        String dec;
-        String res;
-    op = "";
-    var ="";
-    dec = "";
+        String num = "";
+        String op = "";
+        String var = "";
+        String dec = "";
+        String res = "";
+        Double dval = 0.0;
     num = numberExpression();
-    label_2:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 25:
-      case 26:
-        ;
-        break;
-      default:
-        jj_la1[5] = jj_gen;
-        break label_2;
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 25:
-        op = jj_consume_token(25).image;
-        break;
-      case 26:
-        op = jj_consume_token(26).image;
-        break;
-      default:
-        jj_la1[6] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      var = jj_consume_token(VARIABLE).image;
-    }
-    label_3:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case DECIMAL_LITERAL:
-        ;
-        break;
-      default:
-        jj_la1[7] = jj_gen;
-        break label_3;
-      }
-      dec = jj_consume_token(DECIMAL_LITERAL).image;
-    }
-            res = num + op + var + dec;
+            dval = Double.parseDouble(num);
+            res = String.valueOf(dval);
+//	    System.out.println("res = " + res);
             {if (true) return res;}
     throw new Error("Missing return statement in function");
   }
@@ -531,7 +665,7 @@ String res;
         Duration duration;
         long differenceInSeconds;
     time1 = jj_consume_token(TIMESTAMP_LITERAL).image;
-    op = jj_consume_token(26).image;
+    op = jj_consume_token(SUB).image;
     time2 = jj_consume_token(TIMESTAMP_LITERAL).image;
 //	res = time1 + op + time2;
         time1 = time1.replace("{", "");
@@ -548,16 +682,25 @@ String res;
   }
 
   final public void assignment() throws ParseException {
-  String cell;
-  String op;
-  String exp;
-  String format;
-  String stexp;
-  String res;
-  String form;
-        format = "";
-        stexp = "";
-    cell = cellReferenceWithVar();
+  String cell = "";
+  String op = "";
+  String exp = "";
+  String format = "";
+  String stexp = "";
+  String res = "";
+  String form = "";
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case C:
+      cell = cellReferenceWithVar();
+      break;
+    case VARIABLE:
+      cell = jj_consume_token(VARIABLE).image;
+      break;
+    default:
+      jj_la1[13] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
     op = jj_consume_token(ASSIGNEMENT_OPERATOR).image;
     exp = expression();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -566,27 +709,39 @@ String res;
       stexp = stringExpression();
       break;
     default:
-      jj_la1[8] = jj_gen;
+      jj_la1[14] = jj_gen;
       ;
     }
     res = cell + op + exp + format + stexp;
+//    System.out.println("cell = " + cell + " exp = " + exp);
         variables.add(res);
         cells.put(cell,exp);
   }
 
 //////// assignment for loop
-  final public void forAssignment(int e1, int e2) throws ParseException {
-  String cell;
-  String op;
-  String exp;
-  String format;
-  String stexp;
-  String res;
-  String form;
-  String cell1;
-        format = "";
-        stexp = "";
-    cell = cellReferenceWithVar();
+  final public void forAssignment(int e1, int e2, String var) throws ParseException {
+  String cell = "";
+  String variable = "";
+  String op = "";
+  String exp = "";
+  String format = "";
+  String stexp = "";
+  String res = "";
+  String form = "";
+  String cell1 = "";
+  String result = "";
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case C:
+      cell = cellReferenceWithVar();
+      break;
+    case VARIABLE:
+      variable = jj_consume_token(VARIABLE).image;
+      break;
+    default:
+      jj_la1[15] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
     op = jj_consume_token(ASSIGNEMENT_OPERATOR).image;
     exp = expression();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -595,100 +750,119 @@ String res;
       stexp = stringExpression();
       break;
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[16] = jj_gen;
       ;
     }
-    for(int i = e1; i <= e2 ; i++) {
-//	    cell1 = forCellReference(cell,i);
-            res = cell + op + exp + format + stexp;
-            System.out.println(res);
+    for(int i = e1; i<= e2 ; i++) {
+//      cells.put(var,"2");
+//      result = expression()
+        if(!cell.equals("")) {
+                cell1 = forCellReferenceWithVar(cell,i);
+                res = cell1 + op + exp + format + stexp;
+                cells.put(cell1,exp);
+                } else {
+                        cell1 = variable;
+                        String expression = calculExp(exp, i);
+                        res = cell1 + op + expression + format + stexp;
+                        cells.put(cell1,expression);
+                }
+//	    res = cell1 + op + exp + format + stexp;
+//	    System.out.println(res);
                 variables.add(res);
-                cells.put(cell,exp);
-}
+        }
   }
 
-  final public String forCellReferenceWithVar(String s, int j) throws ParseException {
-  String c;
-  String exp1;
-  String r;
-  String exp2;
+  final public String calculExp(String expr, int j) throws ParseException {
+  String expression;
   String res;
-  String cell;
-  c = String.valueOf(s.charAt(0));
-  exp1 = forCexpr(j);
-  r = s;
-  exp2 = forCexpr(j);
-
-    cell = c + exp1 + r + exp2;
-    System.out.println(cell);
-    {if (true) return cell;}
+  String[] numbers;
+  String[] operators;
+  Double result;
+  expression = expr.replaceAll("[A-Za-z]", String.valueOf(j));
+  numbers = expression.split("[+-]");
+  result = Double.parseDouble(numbers[0]);
+  for (int i = 1; i < numbers.length; i++) {
+      Double num = Double.parseDouble(numbers[i]);
+      char operator = expression.charAt(numbers[i - 1].length());
+      switch (operator) {
+          case '+':
+                result += num;
+                break;
+          case '-':
+                result -= num;
+                break;
+          default:
+                        System.out.println("Invalid operator: " + operator);
+            break;
+     }
+    }
+  res = String.valueOf(result);
+  {if (true) return res;}
     throw new Error("Missing return statement in function");
   }
 
-  final public String forCexpr(int j) throws ParseException {
-        String num;
-        String op;
-        String var;
-        String dec;
-        String res;
-        int val;
-        int decval;
-        int resval;
-        int numval;
-    op = "";
-    var ="";
-    dec = "";
-    val = 0;
-    decval = 0;
-    resval = 0;
-    num = jj_consume_token(DECIMAL_LITERAL).image;
-    label_4:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 25:
-      case 26:
-        ;
-        break;
-      default:
-        jj_la1[10] = jj_gen;
-        break label_4;
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 25:
-        op = jj_consume_token(25).image;
-        break;
-      case 26:
-        op = jj_consume_token(26).image;
-        break;
-      default:
-        jj_la1[11] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      var = jj_consume_token(VARIABLE).image;
+  final public String forCellReferenceWithVar(String cell, int j) throws ParseException {
+  int cIndex;
+  int rIndex;
+  String exp1;
+  String exp2;
+  String res1;
+  String res2;
+  String res;
+  String[] numbers1;
+  String[] operators1;
+  String[] numbers2;
+  String[] operators2;
+  int result1;
+  int result2;
+  cIndex = cell.indexOf("C");
+  rIndex = cell.indexOf("R");
+  exp1 = cell.substring(cIndex + 1, rIndex).trim().replaceAll("[A-Za-z]", String.valueOf(j));
+  numbers1 = exp1.split("[+-]");
+  operators1 = exp1.split("\u005c\u005cd+");
+  result1 = Integer.parseInt(numbers1[0]);
+
+  for (int i = 1; i < numbers1.length; i++) {
+            int num = Integer.parseInt(numbers1[i]);
+            char operator = operators1[i].charAt(0);
+
+            switch (operator) {
+                case '+':
+                    result1 += num;
+                    break;
+                case '-':
+                    result1 -= num;
+                    break;
+                default:
+                    System.out.println("Invalid operator: " + operator);
+                    break;
+                  }
     }
-    label_5:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case DECIMAL_LITERAL:
-        ;
-        break;
-      default:
-        jj_la1[12] = jj_gen;
-        break label_5;
-      }
-      dec = jj_consume_token(DECIMAL_LITERAL).image;
+  res1 = String.valueOf(result1);
+  exp2 = cell.substring(rIndex+1).trim().replaceAll("[A-Za-z]", String.valueOf(j));
+  numbers2 = exp2.split("[+-]");
+  operators2 = exp2.split("\u005c\u005cd+");
+  result2 = Integer.parseInt(numbers2[0]);
+
+  for (int i = 1; i < numbers2.length; i++) {
+            int num = Integer.parseInt(numbers2[i]);
+            char operator = operators2[i].charAt(0);
+
+            switch (operator) {
+                case '+':
+                    result2 += num;
+                    break;
+                case '-':
+                    result2 -= num;
+                    break;
+                default:
+                    System.out.println("Invalid operator: " + operator);
+                    break;
+                  }
     }
-//	    decval = Integer.parseInt(dec);
-            numval = Integer.parseInt(num);
-            if (op.equals("+")) {
-                resval = numval + j;
-          }else if (op.equals("-"))
-                resval = numval - j;
-            else
-                resval = numval;
-            res = String.valueOf(resval);
-            {if (true) return res;}
+    res2 = String.valueOf(result2);
+    res = "C" + res1 + "R" + res2;
+    {if (true) return res;}
     throw new Error("Missing return statement in function");
   }
 
@@ -697,8 +871,9 @@ String res;
         String exp2;
         int e1;
         int e2;
+        String var;
     jj_consume_token(FOR);
-    jj_consume_token(VARIABLE);
+    var = jj_consume_token(VARIABLE).image;
     jj_consume_token(FROM);
     exp1 = expression();
     jj_consume_token(TO);
@@ -706,23 +881,25 @@ String res;
     jj_consume_token(DO);
         e1 = Integer.parseInt(exp1);
         e2 = Integer.parseInt(exp2);
-        forAssignment(e1, e2);
+        forAssignment(e1, e2, var);
     jj_consume_token(END);
   }
 
   final public void parse() throws ParseException {
-    label_6:
+    label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case VARIABLE:
       case FOR:
       case C:
         ;
         break;
       default:
-        jj_la1[13] = jj_gen;
-        break label_6;
+        jj_la1[17] = jj_gen;
+        break label_5;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case VARIABLE:
       case C:
         assignment();
         break;
@@ -730,7 +907,7 @@ String res;
         forLoop();
         break;
       default:
-        jj_la1[14] = jj_gen;
+        jj_la1[18] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -822,105 +999,19 @@ String res;
     finally { jj_save(11, xla); }
   }
 
-  private boolean jj_3_2() {
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_23() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(25)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(26)) return true;
-    }
+  private boolean jj_3R_6() {
     if (jj_scan_token(VARIABLE)) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_13()) { jj_scanpos = xsp; break; }
+    }
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_18() {
+  private boolean jj_3R_30() {
     if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
-    if (jj_3R_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3_11() {
-    if (jj_3R_11()) return true;
-    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
-    if (jj_3R_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3_9() {
-    if (jj_3R_15()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_12() {
-    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(25)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(26)) return true;
-    }
-    if (jj_scan_token(DECIMAL_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3_8() {
-    if (jj_3R_14()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_8() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_8()) {
-    jj_scanpos = xsp;
-    if (jj_3_9()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_19() {
-    if (jj_3R_8()) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_23()) { jj_scanpos = xsp; break; }
-    }
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_scan_token(5)) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_11() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_18()) jj_scanpos = xsp;
-    return false;
-  }
-
-  private boolean jj_3R_14() {
-    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
-    if (jj_scan_token(26)) return true;
-    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3_10() {
-    if (jj_scan_token(DECIMAL_LITERAL)) return true;
-    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
-    if (jj_scan_token(DECIMAL_LITERAL)) return true;
+    if (jj_3R_24()) return true;
     return false;
   }
 
@@ -937,56 +1028,20 @@ String res;
     return false;
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(FUNCTION_NAME)) return true;
-    if (jj_scan_token(22)) return true;
-    if (jj_3R_16()) return true;
-    if (jj_scan_token(23)) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_17() {
-    if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
-    if (jj_3R_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_22() {
-    if (jj_scan_token(24)) return true;
+  private boolean jj_3_10() {
+    if (jj_3R_8()) return true;
+    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
     if (jj_3R_8()) return true;
     return false;
   }
 
-  private boolean jj_3_6() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_21() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_13() {
+  private boolean jj_3R_11() {
+    if (jj_scan_token(OPENPAR)) return true;
     if (jj_scan_token(C)) return true;
-    if (jj_3R_19()) return true;
+    if (jj_3R_8()) return true;
     if (jj_scan_token(R)) return true;
-    if (jj_3R_19()) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_3R_10()) return true;
+    if (jj_3R_8()) return true;
+    if (jj_scan_token(CLOSEPAR)) return true;
     return false;
   }
 
@@ -997,30 +1052,242 @@ String res;
     return false;
   }
 
-  private boolean jj_3R_10() {
-    if (jj_3R_13()) return true;
+  private boolean jj_3R_29() {
+    if (jj_scan_token(SUB)) return true;
+    if (jj_3R_24()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(FUNCTION_NAME)) return true;
+    if (jj_scan_token(OPENPAR)) return true;
+    if (jj_3R_16()) return true;
+    if (jj_scan_token(CLOSEPAR)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_28() {
+    if (jj_scan_token(ADD)) return true;
+    if (jj_3R_24()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_25() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_17()) jj_scanpos = xsp;
+    if (jj_3R_28()) {
+    jj_scanpos = xsp;
+    if (jj_3R_29()) {
+    jj_scanpos = xsp;
+    if (jj_3R_30()) return true;
+    }
+    }
     return false;
   }
 
-  private boolean jj_3_3() {
-    if (jj_3R_9()) return true;
+  private boolean jj_3R_22() {
+    if (jj_3R_24()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_25()) { jj_scanpos = xsp; break; }
+    }
     return false;
   }
 
-  private boolean jj_3R_20() {
+  private boolean jj_3R_21() {
+    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
+    if (jj_scan_token(SUB)) return true;
+    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3_9() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3_11() {
+    if (jj_3R_12()) return true;
+    if (jj_scan_token(COMPARISON_OPERATOR)) return true;
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3_8() {
+    if (jj_3R_11()) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(DECIMAL_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_26() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_6()) {
+    jj_scanpos = xsp;
+    if (jj_3_7()) {
+    jj_scanpos = xsp;
+    if (jj_3_8()) {
+    jj_scanpos = xsp;
+    if (jj_3_9()) return true;
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_10() {
+    if (jj_scan_token(TIMESTAMP_LITERAL)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(22)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(23)) return true;
+    }
     if (jj_scan_token(DECIMAL_LITERAL)) return true;
     return false;
   }
 
   private boolean jj_3R_15() {
+    if (jj_3R_22()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_8() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_20()) {
+    if (jj_3R_14()) {
     jj_scanpos = xsp;
+    if (jj_3R_15()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_14() {
     if (jj_3R_21()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_18() {
+    if (jj_scan_token(STRING_CONCATENATION_OPERATOR)) return true;
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  private boolean jj_3_5() {
+    if (jj_3R_10()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_17() {
+    if (jj_3R_11()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_33() {
+    if (jj_scan_token(MOD)) return true;
+    if (jj_3R_26()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_20() {
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_12() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(7)) {
+    jj_scanpos = xsp;
+    if (jj_3R_17()) return true;
+    }
+    xsp = jj_scanpos;
+    if (jj_3R_18()) jj_scanpos = xsp;
+    return false;
+  }
+
+  private boolean jj_3R_32() {
+    if (jj_scan_token(DIV)) return true;
+    if (jj_3R_26()) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_19() {
+    if (jj_scan_token(VARIABLE)) return true;
+    return false;
+  }
+
+  private boolean jj_3_3() {
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_23() {
+    if (jj_scan_token(29)) return true;
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_13() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(22)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(23)) return true;
+    }
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_31() {
+    if (jj_scan_token(MUL)) return true;
+    if (jj_3R_26()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_24() {
+    if (jj_3R_26()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_27()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_27() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_31()) {
+    jj_scanpos = xsp;
+    if (jj_3R_32()) {
+    jj_scanpos = xsp;
+    if (jj_3R_33()) return true;
+    }
     }
     return false;
   }
@@ -1030,8 +1297,13 @@ String res;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_22()) { jj_scanpos = xsp; break; }
+      if (jj_3R_23()) { jj_scanpos = xsp; break; }
     }
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
     return false;
   }
 
@@ -1046,13 +1318,13 @@ String res;
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[15];
+  final private int[] jj_la1 = new int[19];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x60,0x1000000,0x80000,0x80000,0x6000000,0x6000000,0x6000000,0x20,0x400,0x400,0x6000000,0x6000000,0x20,0x10800,0x10800,};
+      jj_la1_0 = new int[] {0x80001e0,0xc80000,0xc80000,0x7000000,0x7000000,0x20000000,0x8000080,0x80000,0x82003e0,0xc00000,0xc00000,0x80003e0,0xc00000,0x10200,0x400,0x10200,0x400,0x10a00,0x10a00,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[12];
   private boolean jj_rescan = false;
@@ -1069,7 +1341,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1084,7 +1356,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1095,7 +1367,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1106,7 +1378,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1116,7 +1388,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1126,7 +1398,7 @@ String res;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 15; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1238,12 +1510,12 @@ String res;
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[27];
+    boolean[] la1tokens = new boolean[30];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 19; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1252,7 +1524,7 @@ String res;
         }
       }
     }
-    for (int i = 0; i < 27; i++) {
+    for (int i = 0; i < 30; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
