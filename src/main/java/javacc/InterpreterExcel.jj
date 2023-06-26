@@ -78,14 +78,10 @@ String expression() :
    {
 	return res;
 	}
-	| LOOKAHEAD(20) res = booleanExpression()
+  |  LOOKAHEAD(20) res = booleanExpression()
    {
 	return res;
 	}
-//  | LOOKAHEAD(12) res = cellReference()
-//  {
-//	return res;
-//	}
   | LOOKAHEAD(20) res = numberExpression() 
    {
 	return res;
@@ -94,14 +90,6 @@ String expression() :
    {
 	return res;
 	}
-//  | LOOKAHEAD(12) res = cellExpression()
-//   {
-//	return res;
-//	}
-//  | LOOKAHEAD(20) res = stringExpression()
-//     {
-//	return res;
-//	}
   | LOOKAHEAD(20) res = timestampExpression()
        {
 	return res;
@@ -118,7 +106,6 @@ String res;
   }
 |  res = numberLiteral()
   {
-//    System.out.println("nb expression");
     return res;
   }
 }
@@ -209,19 +196,19 @@ String factor():
 	String fac = "";
 }
 {
-	LOOKAHEAD(3) fac = <DECIMAL_LITERAL>.image
+	LOOKAHEAD(4) fac = <DECIMAL_LITERAL>.image
 	{
   	return fac;
   	 }
-| 	LOOKAHEAD(3) fac = <FLOATING_POINT_LITERAL>.image
+| 	LOOKAHEAD(4) fac = <FLOATING_POINT_LITERAL>.image
 	{
 		return fac;
 	}
-|   LOOKAHEAD(3) fac = cellReference()
+|   LOOKAHEAD(4) fac = cellReference()
 {
 		return fac;
 }
-|   LOOKAHEAD(3) fac = <STRING_LITERAL>.image
+|   LOOKAHEAD(4) fac = <STRING_LITERAL>.image
 {
 		return fac;
 }
@@ -244,7 +231,6 @@ String functionReturningNumber() :
   arg = functionArguments()
   b = ")".image
   {
-//	res = name + a + arg + b;
 	parts = arg.split(",");
 	n1 = new Double[parts.length];
 	for(int n = 0; n < parts.length; n++) {
@@ -310,22 +296,6 @@ String cellExpression() :
   [
 	expr = expression()
   ]
-//  (
-//	amp = <STRING_CONCATENATION_OPERATOR>.image
-//	expr = stringExpression()
-//{
-//	res = cell + " " + expr;
-//	res = res.replace("\'", "");
-//	return res;
-//}
-//| 	op = <ADD>.image
-//	expr = numberExpression()  {
-//		Double num = Double.
-//	}
-//
-//| 	op = <SUB>.image
-//	expr = numberExpression()
-//)*
   {
 	res = cell + " " + expr;
 	res = res.replace("\'", "");
@@ -361,7 +331,6 @@ String variable() :
 	  | op = "-".image)
 	  (	    var2 = <VARIABLE>.image
 	  {
-//		variables = variables + op + var2;
 		    val = cells.get(var2);
 	    if (val == null)
 	    	variables = variables + op + var2;
@@ -371,7 +340,6 @@ String variable() :
 		  }
 		}
 	| (		expr = numberExpression()
-//	  | expr = cellReference()
 )
 	  {
 		Double num = Double.parseDouble(expr);
@@ -404,7 +372,6 @@ String timestampExpression() :
    )
   num = <DECIMAL_LITERAL>.image
   {
-//	res = time + op + num;
 
 	time = time.replace("{", "");
 	time = time.replace("}", "");
@@ -434,11 +401,37 @@ String booleanExpression() :
   LocalDateTime dateTime2;
   }
 {
-  LOOKAHEAD(3) expr1 = numberExpression() 
+    LOOKAHEAD(6) expr1 = stringExpression()
+  op = <COMPARISON_OPERATOR>.image
+  expr2 = stringExpression()
+  {
+	switch(op) {
+            case "<":
+                res = String.valueOf(expr1.compareTo(expr2) < 0);
+                break;
+            case "<=":
+                res = String.valueOf(expr1.compareTo(expr2) <= 0);
+                break;
+            case "==":
+                res = String.valueOf(expr1.compareTo(expr2) == 0);
+                break;
+            case ">=":
+                res = String.valueOf(expr1.compareTo(expr2) >= 0);
+                break;
+            case ">":
+                res = String.valueOf(expr1.compareTo(expr2) > 0);
+                break;
+            case "<>":
+                res = String.valueOf(expr1.compareTo(expr2) != 0);
+                break;
+              }
+	return res;
+  }
+  
+| LOOKAHEAD(6) expr1 = numberExpression() 
   op = <COMPARISON_OPERATOR>.image
   expr2 = numberExpression()
   {
-//	res = expr1 + op + expr2;
 	e1 = Double.parseDouble(expr1);
 	e2 = Double.parseDouble(expr2);
 	switch(op) {
@@ -496,35 +489,7 @@ String booleanExpression() :
 	}
 	return res;
   }
-
-|   LOOKAHEAD(3) expr1 = stringExpression()
-  op = <COMPARISON_OPERATOR>.image
-  expr2 = stringExpression()
-  {
-	switch(op) {
-            case "<":
-                res = String.valueOf(expr1.compareTo(expr2) < 0);
-                break;
-            case "<=":
-                res = String.valueOf(expr1.compareTo(expr2) <= 0);
-                break;
-            case "==":
-                res = String.valueOf(expr1.compareTo(expr2) == 0);
-                break;
-            case ">=":
-                res = String.valueOf(expr1.compareTo(expr2) >= 0);
-                break;
-            case ">":
-                res = String.valueOf(expr1.compareTo(expr2) > 0);
-                break;
-            case "<>":
-                res = String.valueOf(expr1.compareTo(expr2) != 0);
-                break;
-              }
-	return res;
-  }
-  
-|   LOOKAHEAD(3) expr1 = <TIMESTAMP_LITERAL>.image
+|   LOOKAHEAD(6) expr1 = <TIMESTAMP_LITERAL>.image
   op = <COMPARISON_OPERATOR>.image
   expr2 = <TIMESTAMP_LITERAL>.image
   {
@@ -629,17 +594,19 @@ String cellReference() :
   {
     val1= Double.parseDouble(exp1);
   exp1=String.valueOf(val1);
-  System.out.println("exp1 " + exp1); }
+//  System.out.println("exp1 " + exp1);
+}
   r = <R>.image
   exp2 = numberExpression()
   {    val2= Double.parseDouble(exp2);
   exp2=String.valueOf(val2);
-  System.out.println("exp2 " + exp2); }
+//  System.out.println("exp2 " + exp2);
+}
   <CLOSEPAR>
   {
     
     cell = c + exp1 + r + exp2;
-    System.out.println("cell " + cell);
+//    System.out.println("cell " + cell);
 	res = cells.get(cell);
 	if (res == null)
 		res = "0";
@@ -658,24 +625,10 @@ String Cexpr():
   }
 {
 	num = numberExpression()
-//	{System.out.println("exp = " + num); }
-//	num = factor()
-//	(
-//	  (
-//	    op = "+".image
-//		| op = "-".image
-//		)
-//	  var = <VARIABLE>.image
-//	 )*
-
-//	 (
-//	   dec = <DECIMAL_LITERAL>.image
-//	  )*
 
 	  {
 	    dval = Double.parseDouble(num);
 	    res = String.valueOf(dval);
-//	    System.out.println("res = " + res);
 	    return res;
 	  }
 }
@@ -696,7 +649,6 @@ String differenceOfTimestamps() :
 	op = "-".image
 	time2 = <TIMESTAMP_LITERAL>.image
 	{
-//	res = time1 + op + time2;
 	time1 = time1.replace("{", "");
 	time1 = time1.replace("}", "");
 	time2 = time2.replace("{", "");
@@ -722,7 +674,6 @@ void assignment() :
   }
 {
   (    cell = cellReferenceWithVar()
-//	cell = cellReference()
   | cell = <VARIABLE>.image)
   op = <ASSIGNEMENT_OPERATOR>.image
   exp = expression()
@@ -733,7 +684,6 @@ void assignment() :
   ]
   {
     res = cell + op + exp + format + stexp;
-//    System.out.println("cell = " + cell + " exp = " + exp);
 	variables.add(res);
 	cells.put(cell,exp);
   }
@@ -762,12 +712,9 @@ void forAssignment(int e1, int e2, String var) :
   [
 	format = <FORMATTED>.image
 	stexp = stringExpression()
-//	form = String.format(stexp, exp)
   ]
   {
     for(int i = e1; i<= e2 ; i++) {
-//      cells.put(var,"2");
-//      result = expression()
       	if(!cell.equals("")) { 
 	    	cell1 = forCellReferenceWithVar(cell,i);
 	    	res = cell1 + op + exp + format + stexp;
@@ -778,8 +725,6 @@ void forAssignment(int e1, int e2, String var) :
 	  		res = cell1 + op + expression + format + stexp;
 	  		cells.put(cell1,expression);
 		}
-//	    res = cell1 + op + exp + format + stexp;
-//	    System.out.println(res);
 		variables.add(res);
 	}
   }
